@@ -84,7 +84,7 @@
     }
     .ms a:focus{box-shadow:0 0 0 3px rgba(17,17,17,.15)}
 
-    /* Details */
+    /* Details (source content) */
     details{border:1px solid #ddd;border-radius:14px;background:#fff;margin:12px 0}
     details > summary{
       list-style:none;
@@ -108,11 +108,41 @@
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 10px}
     .chip{font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.9}
 
+    /* Hide the long details list by default (modal will show content). */
+    .details-source{display:none}
+
+    /* Modal */
+    dialog#milestoneDialog{
+      border:none;
+      padding:0;
+      max-width:760px;
+      width:calc(100% - 32px);
+      border-radius:16px;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+    }
+    dialog::backdrop{background:rgba(0,0,0,.35)}
+    .modal-head{
+      display:flex;gap:12px;justify-content:space-between;align-items:flex-start;
+      padding:16px 16px 12px;border-bottom:1px solid #eee;background:#fff;border-top-left-radius:16px;border-top-right-radius:16px
+    }
+    .modal-title{margin:0;font-size:18px;line-height:1.25}
+    .modal-sub{font-size:12px;opacity:.8;margin-top:6px}
+    .modal-close{
+      border:1px solid #111;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;
+      line-height:1;font-size:14px;
+    }
+    .modal-close:hover{background:#f3f3f3}
+    .modal-body{padding:14px 16px 16px;background:#fff;border-bottom-left-radius:16px;border-bottom-right-radius:16px}
+    .modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+    .modal-meta{font-size:14px;opacity:.85;margin-top:10px}
+    .modal-body ul{margin:8px 0 0 22px;font-size:16px;line-height:1.5}
+
     /* Responsive: timeline becomes vertical-ish on narrow screens */
     @media (max-width: 720px){
       .ms{min-width:auto}
       .ms .label,.ms .sub{white-space:normal}
       .milestones{height:96px}
+      dialog#milestoneDialog{width:calc(100% - 20px)}
     }
   </style>
 </head>
@@ -144,17 +174,17 @@
       <div class="legend">
         <span class="pill"><span class="dot edu"></span> Education</span>
         <span class="pill"><span class="dot work"></span> Work</span>
-        <span class="meta" style="margin:0">Click a milestone to expand details.</span>
+        <span class="meta" style="margin:0">Click a milestone for details.</span>
       </div>
 
       <div class="timeline" role="navigation" aria-label="Career timeline">
         <div class="line"></div>
 
-        <!-- Milestones: position is computed as % of span 2004–present -->
+        <!-- Milestones -->
         <div class="milestones" id="milestones">
           <!-- EDU -->
           <div class="ms edu" style="left:0%">
-            <a href="#m-be" data-open="m-be">
+            <a href="#" data-open="m-be">
               <div class="when">2004–2008</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>B.E.</b></div>
@@ -163,7 +193,7 @@
           </div>
 
           <div class="ms edu" style="left:19.05%">
-            <a href="#m-mtech" data-open="m-mtech">
+            <a href="#" data-open="m-mtech">
               <div class="when">2008–2010</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>M.Tech.</b></div>
@@ -173,7 +203,7 @@
 
           <!-- WORK -->
           <div class="ms work" style="left:28.57%">
-            <a href="#m-aerb" data-open="m-aerb">
+            <a href="#" data-open="m-aerb">
               <div class="when">2010–2015</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>AERB</b></div>
@@ -183,7 +213,7 @@
 
           <!-- EDU (PhD) -->
           <div class="ms edu" style="left:47.62%">
-            <a href="#m-phd" data-open="m-phd">
+            <a href="#" data-open="m-phd">
               <div class="when">2014–2021</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>Ph.D.</b></div>
@@ -193,7 +223,7 @@
 
           <!-- WORK -->
           <div class="ms work" style="left:80.95%">
-            <a href="#m-iitbpostdoc" data-open="m-iitbpostdoc">
+            <a href="#" data-open="m-iitbpostdoc">
               <div class="when">2021–2022</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>IITB (Postdoc)</b></div>
@@ -202,7 +232,7 @@
           </div>
 
           <div class="ms work" style="left:85.71%">
-            <a href="#m-ut" data-open="m-ut">
+            <a href="#" data-open="m-ut">
               <div class="when">2022–2023</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>UT Austin</b></div>
@@ -211,7 +241,7 @@
           </div>
 
           <div class="ms work" style="left:90.48%">
-            <a href="#m-lifelink" data-open="m-lifelink">
+            <a href="#" data-open="m-lifelink">
               <div class="when">2022</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>Consulting</b></div>
@@ -220,7 +250,7 @@
           </div>
 
           <div class="ms work" style="left:95.24%">
-            <a href="#m-argonne" data-open="m-argonne">
+            <a href="#" data-open="m-argonne">
               <div class="when">2023–Present</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>Argonne</b></div>
@@ -230,171 +260,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Details: user-friendly vertical cards -->
-    <details id="m-argonne">
-      <summary>
-        <span class="summary-left">
-          <span class="badge work">Work</span>
-          Argonne National Laboratory — Postdoctoral Appointee
-        </span>
-        <span class="summary-right">Nov 2023 – Present • United States</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">GREET</span><span class="chip">Industrial screening</span><span class="chip">GHGRP/FLIGHT</span><span class="chip">LCA + TEA</span><span class="chip">QA/QC datasets</span>
-        </div>
-        <ul>
-          <li>Facility-level decarbonization screening across 300+ industrial sites (refining, ammonia, steel, cement, data centers).</li>
-          <li>Life-cycle emissions drivers using GREET with review-ready documentation and transparent assumptions.</li>
-          <li>Integrated GHGRP/FLIGHT data for facility selection, baseline characterization, and input cross-checking.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> United States (Argonne National Laboratory)</div>
-      </div>
-    </details>
-
-    <details id="m-ut">
-      <summary>
-        <span class="summary-left">
-          <span class="badge work">Work</span>
-          The University of Texas at Austin — Postdoctoral Fellow
-        </span>
-        <span class="summary-right">Jul 2022 – Oct 2023 • Austin, TX</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">MFA</span><span class="chip">EEIO</span><span class="chip">Data harmonization</span><span class="chip">Model calibration</span>
-        </div>
-        <ul>
-          <li>Developed U.S. economy flow/stock accounts using material flow analysis (MFA) and environmentally extended input–output (EEIO).</li>
-          <li>Harmonized multi-source datasets into consistent units and accounting structures for model use.</li>
-          <li>Supported calibration and baseline behavior checks for a stock–flow consistent macroeconomic growth model.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> Austin, Texas, USA</div>
-      </div>
-    </details>
-
-    <details id="m-lifelink">
-      <summary>
-        <span class="summary-left">
-          <span class="badge work">Work</span>
-          Life Link Eco Technologies — Sustainability Consultant (Freelance)
-        </span>
-        <span class="summary-right">Mar 2022 – Jun 2022 • Mumbai, India</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">System dynamics</span><span class="chip">ESG framework</span><span class="chip">Templates</span>
-        </div>
-        <ul>
-          <li>Developed a preliminary system dynamics concept model (causal loop structure) for micro-watershed management.</li>
-          <li>Drafted ESG evaluation dimensions, evidence requirements, and reporting templates for Indian mid-cap companies.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> Mumbai, India</div>
-      </div>
-    </details>
-
-    <details id="m-iitbpostdoc">
-      <summary>
-        <span class="summary-left">
-          <span class="badge work">Work</span>
-          Indian Institute of Technology Bombay — Postdoctoral Fellow
-        </span>
-        <span class="summary-right">Mar 2021 – Mar 2022 • Mumbai, India</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">FEW nexus</span><span class="chip">Water stress</span><span class="chip">Scenario design</span><span class="chip">Sensitivity analysis</span>
-        </div>
-        <ul>
-          <li>Developed the water-stress and scarcity-pricing module in a global FEW-nexus framework (6 regions × 3 sectors).</li>
-          <li>Defined water stress as sectoral demand / exploitable water availability and implemented scarcity-price feedback linked to GDP/capita.</li>
-          <li>Designed and executed a structured scenario suite with parameter consistency checks.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> Mumbai, India</div>
-      </div>
-    </details>
-
-    <details id="m-phd">
-      <summary>
-        <span class="summary-left">
-          <span class="badge edu">Education</span>
-          IIT Bombay – Monash University — Doctoral Researcher (Ph.D.)
-        </span>
-        <span class="summary-right">Dec 2014 – Jan 2021 • Mumbai + Monash</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">Circular economy</span><span class="chip">Diffusion (S-curve)</span><span class="chip">Consumer behavior</span><span class="chip">System dynamics</span>
-        </div>
-        <ul>
-          <li>Developed a circular-economy submodel using recycling-rate (waste diversion) dynamics within an integrated global sustainability framework.</li>
-          <li>Evaluated how uptake trajectories and consumption-growth assumptions shape sustainability outcomes.</li>
-          <li>Assessed consumer purchase behavior and limitations of direct financial incentives as a standalone adoption lever.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> Mumbai, India + Monash University (joint program)</div>
-      </div>
-    </details>
-
-    <details id="m-aerb">
-      <summary>
-        <span class="summary-left">
-          <span class="badge work">Work</span>
-          Atomic Energy Regulatory Board (AERB), Govt. of India — Scientific Officer
-        </span>
-        <span class="summary-right">Aug 2010 – Jan 2015 • Mumbai, India</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">Technical review</span><span class="chip">Regulatory inspections</span><span class="chip">Meeting coordination</span><span class="chip">Traceable documentation</span>
-        </div>
-        <ul>
-          <li>Supported the regulatory review and inspection lifecycle for major power projects with evidence-traceable documentation.</li>
-          <li>Coordinated technical meetings for assigned areas (agenda/materials, minutes, follow-ups) to support timely closure of actions.</li>
-          <li>Participated in inspections across two sites; supported preparation and post-inspection corrective action communication.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> Mumbai, India</div>
-      </div>
-    </details>
-
-    <details id="m-mtech">
-      <summary>
-        <span class="summary-left">
-          <span class="badge edu">Education</span>
-          Indian Institute of Technology Bombay — M.Tech., Energy Systems Engineering
-        </span>
-        <span class="summary-right">2008 – 2010 • Mumbai, India</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">Energy systems</span><span class="chip">Modeling</span><span class="chip">Analysis</span>
-        </div>
-        <ul>
-          <li>Graduate training in energy systems analysis and engineering decision-making.</li>
-          <li>Strengthened quantitative foundations for later sustainability and decarbonization work.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> Mumbai, India</div>
-      </div>
-    </details>
-
-    <details id="m-be">
-      <summary>
-        <span class="summary-left">
-          <span class="badge edu">Education</span>
-          RTM Nagpur University — B.E., Mechanical Engineering
-        </span>
-        <span class="summary-right">2004 – 2008 • Nagpur, India</span>
-      </summary>
-      <div class="details-body">
-        <div class="chips">
-          <span class="chip">Mechanical engineering</span><span class="chip">Thermo/fluids</span><span class="chip">Engineering analysis</span>
-        </div>
-        <ul>
-          <li>Undergraduate training in mechanical engineering fundamentals and quantitative problem solving.</li>
-        </ul>
-        <div class="meta"><b>Location:</b> Nagpur, India</div>
-      </div>
-    </details>
 
     <h2>Current focus</h2>
     <div class="card">
@@ -417,28 +282,296 @@
 
     <p class="meta">© <span id="yr"></span> Neeraj Hanumante</p>
 
+    <!-- ===== Source details (hidden) =====
+         These remain your single source of truth; the modal reads from them.
+         If later you want, we can add a "Show full details list" toggle. -->
+    <div class="details-source" id="detailsSource">
+
+      <details id="m-argonne">
+        <summary>
+          <span class="summary-left">
+            <span class="badge work">Work</span>
+            Argonne National Laboratory — Postdoctoral Appointee
+          </span>
+          <span class="summary-right">Nov 2023 – Present • United States</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">GREET</span><span class="chip">Industrial screening</span><span class="chip">GHGRP/FLIGHT</span><span class="chip">LCA + TEA</span><span class="chip">QA/QC datasets</span>
+          </div>
+          <ul>
+            <li>Facility-level decarbonization screening across 300+ industrial sites (refining, ammonia, steel, cement, data centers).</li>
+            <li>Life-cycle emissions drivers using GREET with review-ready documentation and transparent assumptions.</li>
+            <li>Integrated GHGRP/FLIGHT data for facility selection, baseline characterization, and input cross-checking.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> United States (Argonne National Laboratory)</div>
+        </div>
+      </details>
+
+      <details id="m-ut">
+        <summary>
+          <span class="summary-left">
+            <span class="badge work">Work</span>
+            The University of Texas at Austin — Postdoctoral Fellow
+          </span>
+          <span class="summary-right">Jul 2022 – Oct 2023 • Austin, TX</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">MFA</span><span class="chip">EEIO</span><span class="chip">Data harmonization</span><span class="chip">Model calibration</span>
+          </div>
+          <ul>
+            <li>Developed U.S. economy flow/stock accounts using material flow analysis (MFA) and environmentally extended input–output (EEIO).</li>
+            <li>Harmonized multi-source datasets into consistent units and accounting structures for model use.</li>
+            <li>Supported calibration and baseline behavior checks for a stock–flow consistent macroeconomic growth model.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Austin, Texas, USA</div>
+        </div>
+      </details>
+
+      <details id="m-lifelink">
+        <summary>
+          <span class="summary-left">
+            <span class="badge work">Work</span>
+            Life Link Eco Technologies — Sustainability Consultant (Freelance)
+          </span>
+          <span class="summary-right">Mar 2022 – Jun 2022 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">System dynamics</span><span class="chip">ESG framework</span><span class="chip">Templates</span>
+          </div>
+          <ul>
+            <li>Developed a preliminary system dynamics concept model (causal loop structure) for micro-watershed management.</li>
+            <li>Drafted ESG evaluation dimensions, evidence requirements, and reporting templates for Indian mid-cap companies.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+
+      <details id="m-iitbpostdoc">
+        <summary>
+          <span class="summary-left">
+            <span class="badge work">Work</span>
+            Indian Institute of Technology Bombay — Postdoctoral Fellow
+          </span>
+          <span class="summary-right">Mar 2021 – Mar 2022 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">FEW nexus</span><span class="chip">Water stress</span><span class="chip">Scenario design</span><span class="chip">Sensitivity analysis</span>
+          </div>
+          <ul>
+            <li>Developed the water-stress and scarcity-pricing module in a global FEW-nexus framework (6 regions × 3 sectors).</li>
+            <li>Defined water stress as sectoral demand / exploitable water availability and implemented scarcity-price feedback linked to GDP/capita.</li>
+            <li>Designed and executed a structured scenario suite with parameter consistency checks.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+
+      <details id="m-phd">
+        <summary>
+          <span class="summary-left">
+            <span class="badge edu">Education</span>
+            IIT Bombay – Monash University — Doctoral Researcher (Ph.D.)
+          </span>
+          <span class="summary-right">Dec 2014 – Jan 2021 • Mumbai + Monash</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">Circular economy</span><span class="chip">Diffusion (S-curve)</span><span class="chip">Consumer behavior</span><span class="chip">System dynamics</span>
+          </div>
+          <ul>
+            <li>Developed a circular-economy submodel using recycling-rate (waste diversion) dynamics within an integrated global sustainability framework.</li>
+            <li>Evaluated how uptake trajectories and consumption-growth assumptions shape sustainability outcomes.</li>
+            <li>Assessed consumer purchase behavior and limitations of direct financial incentives as a standalone adoption lever.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India + Monash University (joint program)</div>
+        </div>
+      </details>
+
+      <details id="m-aerb">
+        <summary>
+          <span class="summary-left">
+            <span class="badge work">Work</span>
+            Atomic Energy Regulatory Board (AERB), Govt. of India — Scientific Officer
+          </span>
+          <span class="summary-right">Aug 2010 – Jan 2015 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">Technical review</span><span class="chip">Regulatory inspections</span><span class="chip">Meeting coordination</span><span class="chip">Traceable documentation</span>
+          </div>
+          <ul>
+            <li>Supported the regulatory review and inspection lifecycle for major power projects with evidence-traceable documentation.</li>
+            <li>Coordinated technical meetings for assigned areas (agenda/materials, minutes, follow-ups) to support timely closure of actions.</li>
+            <li>Participated in inspections across two sites; supported preparation and post-inspection corrective action communication.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+
+      <details id="m-mtech">
+        <summary>
+          <span class="summary-left">
+            <span class="badge edu">Education</span>
+            Indian Institute of Technology Bombay — M.Tech., Energy Systems Engineering
+          </span>
+          <span class="summary-right">2008 – 2010 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">Energy systems</span><span class="chip">Modeling</span><span class="chip">Analysis</span>
+          </div>
+          <ul>
+            <li>Graduate training in energy systems analysis and engineering decision-making.</li>
+            <li>Strengthened quantitative foundations for later sustainability and decarbonization work.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+
+      <details id="m-be">
+        <summary>
+          <span class="summary-left">
+            <span class="badge edu">Education</span>
+            RTM Nagpur University — B.E., Mechanical Engineering
+          </span>
+          <span class="summary-right">2004 – 2008 • Nagpur, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">Mechanical engineering</span><span class="chip">Thermo/fluids</span><span class="chip">Engineering analysis</span>
+          </div>
+          <ul>
+            <li>Undergraduate training in mechanical engineering fundamentals and quantitative problem solving.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Nagpur, India</div>
+        </div>
+      </details>
+
+    </div>
+
   </div>
 
+  <!-- Modal -->
+  <dialog id="milestoneDialog" aria-label="Milestone details">
+    <div class="modal-head">
+      <div>
+        <div class="modal-badges" id="mdBadges"></div>
+        <div class="modal-title" id="mdTitle"></div>
+        <div class="modal-sub" id="mdSub"></div>
+      </div>
+      <button class="modal-close" id="mdClose" type="button" aria-label="Close">Close</button>
+    </div>
+    <div class="modal-body" id="mdBody"></div>
+  </dialog>
+
   <script>
-    // Auto-open details when clicking milestones (or when arriving with a hash link)
-    function openById(id){
-      const el = document.getElementById(id);
-      if(!el) return;
-      if(el.tagName.toLowerCase() === "details") el.open = true;
-      el.scrollIntoView({behavior:"smooth", block:"start"});
+    // ===== Modal helpers =====
+    const dialog = document.getElementById("milestoneDialog");
+    const mdTitle = document.getElementById("mdTitle");
+    const mdSub = document.getElementById("mdSub");
+    const mdBody = document.getElementById("mdBody");
+    const mdBadges = document.getElementById("mdBadges");
+    const mdClose = document.getElementById("mdClose");
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
+    function extractAndShow(id){
+      const src = document.getElementById(id);
+      if(!src || src.tagName.toLowerCase() !== "details") return;
+
+      const summary = src.querySelector("summary");
+      const left = summary ? summary.querySelector(".summary-left") : null;
+      const right = summary ? summary.querySelector(".summary-right") : null;
+
+      // Badge (edu/work) and title
+      const badgeEl = left ? left.querySelector(".badge") : null;
+      const badgeText = badgeEl ? badgeEl.textContent.trim() : "";
+      const badgeClass = badgeEl ? (badgeEl.classList.contains("edu") ? "edu" : "work") : "work";
+
+      // Title text without badge
+      let titleText = left ? left.textContent.trim() : "";
+      if(badgeText) titleText = titleText.replace(badgeText, "").trim();
+      mdTitle.textContent = titleText || "Details";
+      mdSub.textContent = right ? right.textContent.trim() : "";
+
+      mdBadges.innerHTML = badgeText
+        ? `<span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>`
+        : "";
+
+      // chips
+      const chipEls = src.querySelectorAll(".chips .chip");
+      const chipsHtml = chipEls.length
+        ? `<div class="chips">${Array.from(chipEls).map(c => `<span class="chip">${escapeHtml(c.textContent.trim())}</span>`).join("")}</div>`
+        : "";
+
+      // bullets
+      const liEls = src.querySelectorAll(".details-body ul li");
+      const bulletsHtml = liEls.length
+        ? `<ul>${Array.from(liEls).map(li => `<li>${escapeHtml(li.textContent.trim())}</li>`).join("")}</ul>`
+        : "";
+
+      // meta (location)
+      const metaEl = src.querySelector(".details-body .meta");
+      const metaHtml = metaEl ? `<div class="modal-meta">${metaEl.innerHTML}</div>` : "";
+
+      mdBody.innerHTML = `${chipsHtml}${bulletsHtml}${metaHtml}`;
+
+      // Open modal
+      if(typeof dialog.showModal === "function"){
+        dialog.showModal();
+      } else {
+        // Fallback (very old browsers): just show as block
+        dialog.setAttribute("open","open");
+      }
+
+      // Update hash without jump (keeps flexibility for deep links later)
+      try {
+        history.replaceState(null, "", "#" + id);
+      } catch(e) { /* ignore */ }
+    }
+
+    // Close behavior
+    mdClose.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (e) => {
+      // click outside modal content closes (native dialog backdrop clicks are on dialog itself)
+      const rect = dialog.getBoundingClientRect();
+      const inDialog = (
+        e.clientX >= rect.left && e.clientX <= rect.right &&
+        e.clientY >= rect.top && e.clientY <= rect.bottom
+      );
+      // If user clicked on the backdrop area (dialog element but outside content),
+      // native dialog already handles; this is a light extra.
+      if(!inDialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => {
+      // Optional: clear hash when closing (comment out if you want the hash to remain)
+      // history.replaceState(null, "", location.pathname);
+    });
+
+    // Milestone click: prevent scroll/jump; open modal
     document.querySelectorAll('[data-open]').forEach(a => {
       a.addEventListener('click', (e) => {
+        e.preventDefault();
         const id = a.getAttribute('data-open');
-        // allow hash update, then open
-        setTimeout(() => openById(id), 0);
+        extractAndShow(id);
       });
     });
 
+    // Open modal if arriving with a hash (no scroll)
     window.addEventListener('load', () => {
       const id = (location.hash || "").replace("#","");
-      if(id) openById(id);
+      if(id) extractAndShow(id);
       document.getElementById("yr").textContent = new Date().getFullYear();
     });
   </script>
