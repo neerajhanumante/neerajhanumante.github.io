@@ -46,6 +46,23 @@
     @media (max-width:720px){
       .legend-hint{margin-left:0;opacity:.7}  /* stacks naturally on mobile */
     }
+   .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      font-size:13px;
+      border:1px solid #111;
+      border-radius:999px;
+      padding:4px 10px;
+      opacity:.95;
+    }
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.degree{background:var(--deg)}
+    .dot.prof{background:var(--pro)}
+  
+    @media (max-width:720px){
+      .legend-hint{margin-left:0;opacity:.7}
+    }
 
     /* ===== Timeline (single, consistent layout system) ===== */
     .timeline-wrap{margin-top:10px}
@@ -426,6 +443,14 @@
               <div class="label"><b>UT Austin</b></div>
             </a>
           </div>
+        <div class="ms prof current" style="left:95.24%" title="2023–Present • Argonne (Professional)">
+          <a href="#" data-open="m-argonne">
+            <div class="when">2023</div>
+            <div class="bubble" aria-hidden="true"></div>
+            <div class="label"><b>Argonne</b></div>
+            <span class="nowtag" aria-hidden="true">Now</span>
+          </a>
+        </div>
 
           </div>
         </div>
