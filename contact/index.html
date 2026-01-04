@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact — Neeraj Hanumante</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
+    .wrap{max-width:900px;margin:0 auto;padding:56px 18px}
+    h1{font-size:34px;margin:0 0 10px}
+    p{font-size:18px;line-height:1.55;margin:10px 0 18px}
+    .card{border:1px solid #ddd;border-radius:14px;padding:16px 16px;margin:14px 0;background:#fff}
+    .btns a{display:inline-block;margin:8px 10px 0 0;padding:10px 12px;border:1px solid #111;border-radius:10px;
+      text-decoration:none;color:#111}
+    .btns a:hover{background:#f3f3f3}
+    .meta{font-size:14px;opacity:.8;margin-top:18px}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Contact</h1>
+
+    <div class="card">
+      <p><b>Email</b> (human-readable):</p>
+      <p style="margin-top:0"><code>Neeraj [dot] Hanumante [at] gmail [dot] com</code></p>
+
+      <div class="meta">
+        Tip: Replace <code>[dot]</code> with <code>.</code> and <code>[at]</code> with <code>@</code>.
+      </div>
+    </div>
+
+    <div class="btns">
+      <a href="/">Home</a>
+      <a href="/linkedin">LinkedIn</a>
+      <a href="/scholar">Google Scholar</a>
+    </div>
+
+    <p class="meta">© <span id="yr"></span> Neeraj Hanumante</p>
+  </div>
+
+  <script>
+    document.getElementById("yr").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
