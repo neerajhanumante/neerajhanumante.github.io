@@ -8,65 +8,393 @@
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
     .wrap{max-width:980px;margin:0 auto;padding:56px 18px}
-    h1{font-size:38px;margin:0 0 6px}
-    .tag{font-size:16px;opacity:.9;margin:0 0 18px}
+    h1{font-size:38px;margin:0}
+    .tag{font-size:16px;opacity:.9;margin:8px 0 16px}
     h2{font-size:22px;margin:34px 0 10px}
     p{font-size:18px;line-height:1.55;margin:10px 0 18px}
     ul{margin:8px 0 18px 22px;font-size:18px;line-height:1.55}
-    .btns a{display:inline-block;margin:8px 10px 0 0;padding:10px 12px;border:1px solid #111;border-radius:10px;
-      text-decoration:none;color:#111}
-    .btns a:hover{background:#f3f3f3}
+
+    /* Header */
+    .topbar{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    .nameblock{min-width:260px}
+    .navbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .navbtns a{display:inline-block;padding:10px 12px;border:1px solid #111;border-radius:10px;text-decoration:none;color:#111}
+    .navbtns a:hover{background:#f3f3f3}
+
+    /* Cards */
     .card{border:1px solid #ddd;border-radius:14px;padding:16px 16px;margin:14px 0;background:#fff}
     .meta{font-size:14px;opacity:.8;margin-top:10px}
-    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 
-    /* Trajectory UI */
-    .traj-header{display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between}
-    .selected{font-size:14px;opacity:.85}
-    .rail{position:relative;margin:12px 0 6px;padding:10px 8px}
-    .rail-line{height:2px;background:#ddd;border-radius:99px}
-    .marks{position:relative;height:0}
-    .mark{
-      position:absolute; top:-7px; width:12px; height:12px; border-radius:50%;
-      background:#111; cursor:pointer; transform:translateX(-50%);
-      box-shadow:0 0 0 3px #fff; border:1px solid #111;
+    /* Timeline */
+    .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 2px}
+    .pill{display:inline-flex;gap:8px;align-items:center;font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.95}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.edu{background:#2563eb}
+    .dot.work{background:#16a34a}
+
+    .timeline-wrap{margin-top:10px}
+    .timeline{
+      position:relative;
+      border:1px solid #eee;
+      border-radius:14px;
+      padding:18px 14px 22px;
+      background:#fafafa;
+      overflow:hidden;
     }
-    .mark:hover{transform:translateX(-50%) scale(1.08)}
-    .mark-label{
-      position:absolute; top:10px; transform:translateX(-50%);
-      font-size:12px; opacity:.75; white-space:nowrap;
+    .line{height:3px;background:#d9d9d9;border-radius:99px;margin:14px 6px 22px}
+
+    .milestones{
+      position:relative;
+      margin-top:-38px; /* pull dots onto the line */
+      height:72px;
     }
+    .ms{
+      position:absolute;
+      transform:translateX(-50%);
+      cursor:pointer;
+      text-align:center;
+      min-width:120px;
+      user-select:none;
+    }
+    .ms .when{font-size:12px;opacity:.75;margin-bottom:6px;white-space:nowrap}
+    .ms .bubble{
+      width:16px;height:16px;border-radius:50%;
+      margin:0 auto;
+      border:2px solid #111;
+      background:#111;
+      box-shadow:0 0 0 3px #fafafa;
+    }
+    .ms.edu .bubble{background:#2563eb;border-color:#2563eb}
+    .ms.work .bubble{background:#16a34a;border-color:#16a34a}
 
-    .slider-row{display:flex; gap:14px; align-items:center; margin-top:14px}
-    input[type="range"]{width:100%}
-    .year-pill{min-width:64px;text-align:center;border:1px solid #111;border-radius:999px;padding:6px 10px;font-size:14px}
+    .ms .label{
+      font-size:12px;
+      opacity:.9;
+      margin-top:8px;
+      line-height:1.25;
+      white-space:nowrap;
+    }
+    .ms .sub{font-size:12px;opacity:.7;white-space:nowrap}
 
-    .role-title{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
-    .role-title b{font-size:18px}
-    .role-title span{font-size:14px;opacity:.85}
+    .ms:hover .bubble{transform:scale(1.06)}
+    .ms:focus-within .bubble{transform:scale(1.08)}
+    .ms a{
+      color:inherit;text-decoration:none;display:block;outline:none;
+      padding:2px 6px;border-radius:10px;
+    }
+    .ms a:focus{box-shadow:0 0 0 3px rgba(17,17,17,.15)}
 
+    /* Details */
+    details{border:1px solid #ddd;border-radius:14px;background:#fff;margin:12px 0}
+    details > summary{
+      list-style:none;
+      cursor:pointer;
+      padding:14px 14px;
+      display:flex;
+      gap:12px;
+      align-items:baseline;
+      justify-content:space-between;
+      font-weight:650;
+    }
+    details > summary::-webkit-details-marker{display:none}
+    .summary-left{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+    .badge{
+      font-size:12px;border:1px solid #111;border-radius:999px;padding:3px 9px;opacity:.9
+    }
+    .badge.edu{border-color:#2563eb;color:#2563eb}
+    .badge.work{border-color:#16a34a;color:#16a34a}
+    .summary-right{font-size:12px;opacity:.75;white-space:nowrap}
+    .details-body{padding:0 14px 14px}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 10px}
     .chip{font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.9}
-    details{margin-top:8px}
-    summary{cursor:pointer;font-weight:600}
-    summary::marker{font-size:14px}
+
+    /* Responsive: timeline becomes vertical-ish on narrow screens */
+    @media (max-width: 720px){
+      .ms{min-width:auto}
+      .ms .label,.ms .sub{white-space:normal}
+      .milestones{height:96px}
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Neeraj Hanumante</h1>
-    <div class="tag">Decarbonization • Life Cycle Assessment (LCA) • Energy Systems • Techno-economic screening</div>
+
+    <div class="topbar">
+      <div class="nameblock">
+        <h1>Neeraj Hanumante</h1>
+        <div class="tag">Decarbonization • Life Cycle Assessment (LCA) • Energy Systems • Techno-economic screening</div>
+      </div>
+
+      <div class="navbtns">
+        <a href="/scholar">Google Scholar</a>
+        <a href="/linkedin">LinkedIn</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
 
     <p>
       I work at the intersection of industrial emissions, energy systems, and review-ready technical documentation.
-      My recent work includes facility-level decarbonization screening using GREET, integrating public datasets
+      Recent work includes facility-level decarbonization screening using GREET, integrating public datasets
       (e.g., EPA GHGRP/FLIGHT), and translating modeling outputs into decision-ready insights.
     </p>
 
-    <div class="btns">
-      <a href="/scholar">Google Scholar</a>
-      <a href="/linkedin">LinkedIn</a>
+    <h2>Career trajectory</h2>
+
+    <div class="card timeline-wrap">
+      <div class="legend">
+        <span class="pill"><span class="dot edu"></span> Education</span>
+        <span class="pill"><span class="dot work"></span> Work</span>
+        <span class="meta" style="margin:0">Click a milestone to expand details.</span>
+      </div>
+
+      <div class="timeline" role="navigation" aria-label="Career timeline">
+        <div class="line"></div>
+
+        <!-- Milestones: position is computed as % of span 2004–present -->
+        <div class="milestones" id="milestones">
+          <!-- EDU -->
+          <div class="ms edu" style="left:0%">
+            <a href="#m-be" data-open="m-be">
+              <div class="when">2004–2008</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>B.E.</b></div>
+              <div class="sub">Nagpur, India</div>
+            </a>
+          </div>
+
+          <div class="ms edu" style="left:19.05%">
+            <a href="#m-mtech" data-open="m-mtech">
+              <div class="when">2008–2010</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>M.Tech.</b></div>
+              <div class="sub">Mumbai, India</div>
+            </a>
+          </div>
+
+          <!-- WORK -->
+          <div class="ms work" style="left:28.57%">
+            <a href="#m-aerb" data-open="m-aerb">
+              <div class="when">2010–2015</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>AERB</b></div>
+              <div class="sub">Mumbai, India</div>
+            </a>
+          </div>
+
+          <!-- EDU (PhD) -->
+          <div class="ms edu" style="left:47.62%">
+            <a href="#m-phd" data-open="m-phd">
+              <div class="when">2014–2021</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>Ph.D.</b></div>
+              <div class="sub">Mumbai + Monash</div>
+            </a>
+          </div>
+
+          <!-- WORK -->
+          <div class="ms work" style="left:80.95%">
+            <a href="#m-iitbpostdoc" data-open="m-iitbpostdoc">
+              <div class="when">2021–2022</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>IITB (Postdoc)</b></div>
+              <div class="sub">Mumbai, India</div>
+            </a>
+          </div>
+
+          <div class="ms work" style="left:85.71%">
+            <a href="#m-ut" data-open="m-ut">
+              <div class="when">2022–2023</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>UT Austin</b></div>
+              <div class="sub">Austin, TX</div>
+            </a>
+          </div>
+
+          <div class="ms work" style="left:90.48%">
+            <a href="#m-lifelink" data-open="m-lifelink">
+              <div class="when">2022</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>Consulting</b></div>
+              <div class="sub">Mumbai, India</div>
+            </a>
+          </div>
+
+          <div class="ms work" style="left:95.24%">
+            <a href="#m-argonne" data-open="m-argonne">
+              <div class="when">2023–Present</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>Argonne</b></div>
+              <div class="sub">US</div>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Details: user-friendly vertical cards -->
+    <details id="m-argonne">
+      <summary>
+        <span class="summary-left">
+          <span class="badge work">Work</span>
+          Argonne National Laboratory — Postdoctoral Appointee
+        </span>
+        <span class="summary-right">Nov 2023 – Present • United States</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">GREET</span><span class="chip">Industrial screening</span><span class="chip">GHGRP/FLIGHT</span><span class="chip">LCA + TEA</span><span class="chip">QA/QC datasets</span>
+        </div>
+        <ul>
+          <li>Facility-level decarbonization screening across 300+ industrial sites (refining, ammonia, steel, cement, data centers).</li>
+          <li>Life-cycle emissions drivers using GREET with review-ready documentation and transparent assumptions.</li>
+          <li>Integrated GHGRP/FLIGHT data for facility selection, baseline characterization, and input cross-checking.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> United States (Argonne National Laboratory)</div>
+      </div>
+    </details>
+
+    <details id="m-ut">
+      <summary>
+        <span class="summary-left">
+          <span class="badge work">Work</span>
+          The University of Texas at Austin — Postdoctoral Fellow
+        </span>
+        <span class="summary-right">Jul 2022 – Oct 2023 • Austin, TX</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">MFA</span><span class="chip">EEIO</span><span class="chip">Data harmonization</span><span class="chip">Model calibration</span>
+        </div>
+        <ul>
+          <li>Developed U.S. economy flow/stock accounts using material flow analysis (MFA) and environmentally extended input–output (EEIO).</li>
+          <li>Harmonized multi-source datasets into consistent units and accounting structures for model use.</li>
+          <li>Supported calibration and baseline behavior checks for a stock–flow consistent macroeconomic growth model.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> Austin, Texas, USA</div>
+      </div>
+    </details>
+
+    <details id="m-lifelink">
+      <summary>
+        <span class="summary-left">
+          <span class="badge work">Work</span>
+          Life Link Eco Technologies — Sustainability Consultant (Freelance)
+        </span>
+        <span class="summary-right">Mar 2022 – Jun 2022 • Mumbai, India</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">System dynamics</span><span class="chip">ESG framework</span><span class="chip">Templates</span>
+        </div>
+        <ul>
+          <li>Developed a preliminary system dynamics concept model (causal loop structure) for micro-watershed management.</li>
+          <li>Drafted ESG evaluation dimensions, evidence requirements, and reporting templates for Indian mid-cap companies.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> Mumbai, India</div>
+      </div>
+    </details>
+
+    <details id="m-iitbpostdoc">
+      <summary>
+        <span class="summary-left">
+          <span class="badge work">Work</span>
+          Indian Institute of Technology Bombay — Postdoctoral Fellow
+        </span>
+        <span class="summary-right">Mar 2021 – Mar 2022 • Mumbai, India</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">FEW nexus</span><span class="chip">Water stress</span><span class="chip">Scenario design</span><span class="chip">Sensitivity analysis</span>
+        </div>
+        <ul>
+          <li>Developed the water-stress and scarcity-pricing module in a global FEW-nexus framework (6 regions × 3 sectors).</li>
+          <li>Defined water stress as sectoral demand / exploitable water availability and implemented scarcity-price feedback linked to GDP/capita.</li>
+          <li>Designed and executed a structured scenario suite with parameter consistency checks.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> Mumbai, India</div>
+      </div>
+    </details>
+
+    <details id="m-phd">
+      <summary>
+        <span class="summary-left">
+          <span class="badge edu">Education</span>
+          IIT Bombay – Monash University — Doctoral Researcher (Ph.D.)
+        </span>
+        <span class="summary-right">Dec 2014 – Jan 2021 • Mumbai + Monash</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">Circular economy</span><span class="chip">Diffusion (S-curve)</span><span class="chip">Consumer behavior</span><span class="chip">System dynamics</span>
+        </div>
+        <ul>
+          <li>Developed a circular-economy submodel using recycling-rate (waste diversion) dynamics within an integrated global sustainability framework.</li>
+          <li>Evaluated how uptake trajectories and consumption-growth assumptions shape sustainability outcomes.</li>
+          <li>Assessed consumer purchase behavior and limitations of direct financial incentives as a standalone adoption lever.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> Mumbai, India + Monash University (joint program)</div>
+      </div>
+    </details>
+
+    <details id="m-aerb">
+      <summary>
+        <span class="summary-left">
+          <span class="badge work">Work</span>
+          Atomic Energy Regulatory Board (AERB), Govt. of India — Scientific Officer
+        </span>
+        <span class="summary-right">Aug 2010 – Jan 2015 • Mumbai, India</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">Technical review</span><span class="chip">Regulatory inspections</span><span class="chip">Meeting coordination</span><span class="chip">Traceable documentation</span>
+        </div>
+        <ul>
+          <li>Supported the regulatory review and inspection lifecycle for major power projects with evidence-traceable documentation.</li>
+          <li>Coordinated technical meetings for assigned areas (agenda/materials, minutes, follow-ups) to support timely closure of actions.</li>
+          <li>Participated in inspections across two sites; supported preparation and post-inspection corrective action communication.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> Mumbai, India</div>
+      </div>
+    </details>
+
+    <details id="m-mtech">
+      <summary>
+        <span class="summary-left">
+          <span class="badge edu">Education</span>
+          Indian Institute of Technology Bombay — M.Tech., Energy Systems Engineering
+        </span>
+        <span class="summary-right">2008 – 2010 • Mumbai, India</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">Energy systems</span><span class="chip">Modeling</span><span class="chip">Analysis</span>
+        </div>
+        <ul>
+          <li>Graduate training in energy systems analysis and engineering decision-making.</li>
+          <li>Strengthened quantitative foundations for later sustainability and decarbonization work.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> Mumbai, India</div>
+      </div>
+    </details>
+
+    <details id="m-be">
+      <summary>
+        <span class="summary-left">
+          <span class="badge edu">Education</span>
+          RTM Nagpur University — B.E., Mechanical Engineering
+        </span>
+        <span class="summary-right">2004 – 2008 • Nagpur, India</span>
+      </summary>
+      <div class="details-body">
+        <div class="chips">
+          <span class="chip">Mechanical engineering</span><span class="chip">Thermo/fluids</span><span class="chip">Engineering analysis</span>
+        </div>
+        <ul>
+          <li>Undergraduate training in mechanical engineering fundamentals and quantitative problem solving.</li>
+        </ul>
+        <div class="meta"><b>Location:</b> Nagpur, India</div>
+      </div>
+    </details>
 
     <h2>Current focus</h2>
     <div class="card">
@@ -84,269 +412,35 @@
         <li>Built traceable datasets and documentation (assumption registers, unit normalization, consistency checks) to support reproducibility.</li>
         <li>Academic outputs across energy–water–economy and circular economy modeling (see Google Scholar).</li>
       </ul>
-      <div class="meta">
-        Placeholder: Add 1–2 key project links, a short resume PDF link, or a “Contact” email below.
-      </div>
+      <div class="meta">Optional next: add a /resume page or a PDF link.</div>
     </div>
 
-    <div class="btns">
-      <a href="mailto:Neeraj.Hanumante@gmail.com?subject=Hello%20Neeraj%20%E2%80%93%20Website%20Contact">Contact</a>
-    </div>
-    <p class="meta">Preferred: email via the button above.</p>
+    <p class="meta">© <span id="yr"></span> Neeraj Hanumante</p>
+
   </div>
 
-  
-    <h2>Career trajectory</h2>
-
-    <div class="card" id="trajectory">
-      <div class="traj-header">
-        <div><b>Explore by year</b></div>
-        <div class="selected" id="selectedText">Selected: —</div>
-      </div>
-
-      <div class="rail" aria-hidden="true">
-        <div class="rail-line"></div>
-        <div class="marks" id="marks"></div>
-      </div>
-
-      <div class="slider-row">
-        <div class="year-pill" id="yearPill">2010</div>
-        <input id="yearSlider" type="range" min="2004" max="2026" step="1" value="2026" />
-        <div class="year-pill" id="maxPill">2026</div>
-      </div>
-
-      <div class="meta">Tip: drag the slider or click a marker to jump between roles.</div>
-    </div>
-
-    <div class="card" id="roleCard" aria-live="polite">
-      <!-- Filled by JS -->
-    </div>
-
   <script>
-    // ====== Edit-friendly data: add more details here anytime ======
-    const roles = [
-      {
-        start: 2023, end: 2026,
-        title: "Argonne National Laboratory — Postdoctoral Appointee",
-        dates: "Nov 2023 – Present",
-        chips: ["GREET", "Industrial screening", "GHGRP/FLIGHT", "LCA + TEA", "QA/QC datasets"],
-        bullets: [
-          "Facility-level decarbonization screening across 300+ industrial sites (refining, ammonia, steel, cement, data centers).",
-          "Life-cycle emissions drivers using GREET; clear assumptions and review-ready documentation.",
-          "Integrated GHGRP/FLIGHT data for facility selection and baseline emissions characterization."
-        ],
-        more: [
-          "<b>Typical outputs:</b> traceable datasets, assumptions register, sponsor-ready briefs/presentations.",
-          "<b>Tools:</b> GREET, Python, QGIS, Excel (plus supporting data workflows).",
-          "<b>Notes:</b> Add specific project links here later (report, figure, talk, etc.)."
-        ]
-      },
-      {
-        start: 2022, end: 2023,
-        title: "The University of Texas at Austin — Postdoctoral Fellow",
-        dates: "Jul 2022 – Oct 2023",
-        chips: ["MFA", "EEIO", "Data harmonization", "Model calibration"],
-        bullets: [
-          "Built and reconciled U.S. economy flow/stock accounts using material flow analysis (MFA) and environmentally extended input–output (EEIO).",
-          "Harmonized multi-source datasets into consistent units and accounting structures for model use.",
-          "Supported calibration and baseline behavior checks for a stock–flow consistent macroeconomic growth model."
-        ],
-        more: [
-          "<b>Data sources:</b> EXIOBASE, BEA, FRED, World Bank, USGS, IEA, FAOSTAT.",
-          "<b>Tools:</b> R, Python, Excel.",
-          "<b>Collaboration:</b> technical discussions/feedback with partner institutions."
-        ]
-      },
-      {
-        start: 2022, end: 2022,
-        title: "Life Link Eco Technologies — Sustainability Consultant (Freelance)",
-        dates: "Mar 2022 – Jun 2022",
-        chips: ["System dynamics", "ESG framework", "Templates"],
-        bullets: [
-          "Developed a preliminary system dynamics concept model (causal loop structure) for micro-watershed management.",
-          "Drafted ESG evaluation dimensions, evidence requirements, and reporting templates for Indian mid-cap companies.",
-          "Documented a micro-scale decision-support framework (data needs, logic, decision metrics)."
-        ],
-        more: [
-          "<b>Scope:</b> short-term engagement; deliverables focused on framework + documentation.",
-          "<b>Notes:</b> Add client/project name if you decide to disclose it."
-        ]
-      },
-      {
-        start: 2021, end: 2022,
-        title: "Indian Institute of Technology Bombay — Postdoctoral Fellow",
-        dates: "Mar 2021 – Mar 2022",
-        chips: ["FEW nexus", "Water stress", "Scenario suite", "Sensitivity analysis"],
-        bullets: [
-          "Developed the water-stress and scarcity-pricing module in a global FEW-nexus framework (6 regions × 3 sectors).",
-          "Defined water stress as sectoral demand / exploitable water availability; implemented scarcity-price feedback linked to GDP/capita.",
-          "Designed and ran a structured scenario suite (baseline, growth futures, sectoral demand reduction, feedback cases) with sensitivity checks."
-        ],
-        more: [
-          "<b>Outputs:</b> peer-reviewed publications; scenario design and documented assumptions.",
-          "<b>Tools:</b> MATLAB, Python, Excel, Vensim, yEd."
-        ]
-      },
-      {
-        start: 2014, end: 2021,
-        title: "IIT Bombay – Monash University — Doctoral Researcher (PhD)",
-        dates: "Dec 2014 – Jan 2021",
-        chips: ["Circular economy", "Diffusion (S-curve)", "Consumer behavior", "System dynamics"],
-        bullets: [
-          "Developed a circular-economy submodel within an integrated global sustainability assessment framework using recycling-rate (waste diversion) dynamics.",
-          "Evaluated how recycling uptake trajectories and consumption-growth assumptions shape sustainability outcomes.",
-          "Assessed consumer purchase behavior and limitations of direct financial incentives as a standalone adoption lever."
-        ],
-        more: [
-          "<b>Tools:</b> MATLAB, Python, Excel, Vensim, yEd.",
-          "<b>Funding:</b> Prime Minister’s Fellowship for Doctoral Research (industry partner).",
-          "<b>Publications:</b> See Google Scholar link above."
-        ]
-      },
-      {
-        start: 2010, end: 2015,
-        title: "Atomic Energy Regulatory Board (AERB), Govt. of India — Scientific Officer",
-        dates: "Aug 2010 – Jan 2015",
-        chips: ["Technical review", "Regulatory inspections", "Meeting coordination", "Traceable documentation"],
-        bullets: [
-          "Supported the regulatory review and inspection lifecycle for major power projects, with evidence-traceable documentation.",
-          "Coordinated technical meetings for assigned areas (agenda/materials, minutes, follow-ups) and supported timely closure of actions.",
-          "Participated in inspections across two sites; supported preparation based on prior recommendations and post-inspection corrective action communication."
-        ],
-        more: [
-          "<b>Progression:</b> Scientific Officer C → D (promotion within tenure).",
-          "<b>Notes:</b> Add quantified review areas/inspections here if you want to mirror your resume."
-        ]
-      },
-      {
-        start: 2004, end: 2008,
-        title: "RTM Nagpur University — B.E., Mechanical Engineering",
-        dates: "2004 – 2008",
-        chips: ["Mechanical engineering", "Foundations", "Systems thinking"],
-        bullets: [
-          "Completed undergraduate training in mechanical engineering fundamentals.",
-          "Built a strong base in thermodynamics, fluids, heat transfer, and engineering analysis.",
-          "Developed early interest in energy systems and large-scale infrastructure."
-        ],
-        more: [
-          "<b>Notes:</b> Add key projects, internships, or achievements here if you want."
-        ]
-      },
-      {
-        start: 2008, end: 2010,
-        title: "Indian Institute of Technology Bombay — M.Tech., Energy Systems Engineering",
-        dates: "2008 – 2010",
-        chips: ["Energy systems", "Modeling", "Analysis"],
-        bullets: [
-          "Graduate training focused on energy systems analysis and engineering decision-making.",
-          "Strengthened analytical foundation for later work in sustainability and decarbonization.",
-          "Built capability in quantitative modeling workflows relevant to applied research."
-        ],
-        more: [
-          "<b>Notes:</b> Add thesis title or 1–2 focus areas if you’d like."
-        ]
-      }
-
-    ];
-
-    const education = [
-      { year: 2021, label: "Ph.D., Chemical Engineering — IIT Bombay – Monash University" },
-      { year: 2010, label: "M.Tech., Energy Systems Engineering — IIT Bombay" },
-      { year: 2008, label: "B.E., Mechanical Engineering — RTM Nagpur University" }
-    ];
-
-    const slider = document.getElementById("yearSlider");
-    const yearPill = document.getElementById("yearPill");
-    const maxPill = document.getElementById("maxPill");
-    const selectedText = document.getElementById("selectedText");
-    const roleCard = document.getElementById("roleCard");
-    const marks = document.getElementById("marks");
-
-    // set slider max to current year automatically (keeps it future-proof)
-    const currentYear = new Date().getFullYear();
-    slider.max = currentYear;
-    slider.value = currentYear;
-    maxPill.textContent = currentYear;
-
-    function pickRole(year){
-      // Find role whose range includes year. If none, pick nearest by start year.
-      let inRange = roles.find(r => year >= r.start && year <= r.end);
-      if (inRange) return inRange;
-
-      // nearest by start
-      let nearest = roles.reduce((best, r) => {
-        const d = Math.abs(year - r.start);
-        return (d < best.d) ? { r, d } : best;
-      }, { r: roles[0], d: Infinity }).r;
-      return nearest;
+    // Auto-open details when clicking milestones (or when arriving with a hash link)
+    function openById(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(el.tagName.toLowerCase() === "details") el.open = true;
+      el.scrollIntoView({behavior:"smooth", block:"start"});
     }
 
-    function render(role, year){
-      yearPill.textContent = year;
-      selectedText.textContent = `Selected: ${role.title} (${role.dates})`;
-
-      const chipsHtml = (role.chips || []).map(c => `<span class="chip">${c}</span>`).join("");
-      const bulletsHtml = (role.bullets || []).map(b => `<li>${b}</li>`).join("");
-      const moreHtml = (role.more || []).map(m => `<div class="meta">${m}</div>`).join("");
-
-      // Add education that matches the selected year (light touch)
-      const eduHits = education.filter(e => e.year === year).map(e => `<div class="meta"><b>Education (${e.year}):</b> ${e.label}</div>`).join("");
-
-      roleCard.innerHTML = `
-        <div class="role-title">
-          <b>${role.title}</b>
-          <span>${role.dates}</span>
-        </div>
-        <div class="chips">${chipsHtml}</div>
-        <ul>${bulletsHtml}</ul>
-        ${eduHits ? `<div class="card" style="border-color:#eee;background:#fafafa">${eduHits}</div>` : ``}
-        <details>
-          <summary>More details</summary>
-          ${moreHtml || `<div class="meta">Add more details by editing the <code>roles</code> array in the page source.</div>`}
-        </details>
-      `;
-    }
-
-    function placeMarkers(){
-      marks.innerHTML = "";
-      const min = parseInt(slider.min,10);
-      const max = parseInt(slider.max,10);
-
-      // role start markers
-      const points = [...new Set(roles.map(r => r.start))].sort((a,b)=>a-b);
-
-      points.forEach(y => {
-        const pct = ((y - min) / (max - min)) * 100;
-        const dot = document.createElement("div");
-        dot.className = "mark";
-        dot.style.left = pct + "%";
-        dot.title = String(y);
-        dot.addEventListener("click", () => {
-          slider.value = y;
-          const role = pickRole(y);
-          render(role, y);
-        });
-
-        const lbl = document.createElement("div");
-        lbl.className = "mark-label";
-        lbl.style.left = pct + "%";
-        lbl.textContent = y;
-
-        marks.appendChild(dot);
-        marks.appendChild(lbl);
+    document.querySelectorAll('[data-open]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('data-open');
+        // allow hash update, then open
+        setTimeout(() => openById(id), 0);
       });
-    }
-
-    slider.addEventListener("input", (e) => {
-      const year = parseInt(e.target.value, 10);
-      const role = pickRole(year);
-      render(role, year);
     });
 
-    // init
-    placeMarkers();
-    const initYear = parseInt(slider.value, 10);
-    render(pickRole(initYear), initYear);
+    window.addEventListener('load', () => {
+      const id = (location.hash || "").replace("#","");
+      if(id) openById(id);
+      document.getElementById("yr").textContent = new Date().getFullYear();
+    });
   </script>
 </body>
 </html>
