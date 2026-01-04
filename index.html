@@ -68,32 +68,6 @@
       <a href="/linkedin">LinkedIn</a>
     </div>
 
-    <h2>Career trajectory</h2>
-
-    <div class="card" id="trajectory">
-      <div class="traj-header">
-        <div><b>Explore by year</b></div>
-        <div class="selected" id="selectedText">Selected: —</div>
-      </div>
-
-      <div class="rail" aria-hidden="true">
-        <div class="rail-line"></div>
-        <div class="marks" id="marks"></div>
-      </div>
-
-      <div class="slider-row">
-        <div class="year-pill" id="yearPill">2010</div>
-        <input id="yearSlider" type="range" min="2004" max="2026" step="1" value="2026" />
-        <div class="year-pill" id="maxPill">2026</div>
-      </div>
-
-      <div class="meta">Tip: drag the slider or click a marker to jump between roles.</div>
-    </div>
-
-    <div class="card" id="roleCard" aria-live="polite">
-      <!-- Filled by JS -->
-    </div>
-
     <h2>Current focus</h2>
     <div class="card">
       <ul>
@@ -120,6 +94,33 @@
     </div>
     <p class="meta">Preferred: email via the button above.</p>
   </div>
+
+  
+    <h2>Career trajectory</h2>
+
+    <div class="card" id="trajectory">
+      <div class="traj-header">
+        <div><b>Explore by year</b></div>
+        <div class="selected" id="selectedText">Selected: —</div>
+      </div>
+
+      <div class="rail" aria-hidden="true">
+        <div class="rail-line"></div>
+        <div class="marks" id="marks"></div>
+      </div>
+
+      <div class="slider-row">
+        <div class="year-pill" id="yearPill">2010</div>
+        <input id="yearSlider" type="range" min="2004" max="2026" step="1" value="2026" />
+        <div class="year-pill" id="maxPill">2026</div>
+      </div>
+
+      <div class="meta">Tip: drag the slider or click a marker to jump between roles.</div>
+    </div>
+
+    <div class="card" id="roleCard" aria-live="polite">
+      <!-- Filled by JS -->
+    </div>
 
   <script>
     // ====== Edit-friendly data: add more details here anytime ======
