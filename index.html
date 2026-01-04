@@ -36,11 +36,16 @@
 
     /* Legend */
     .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px}
-    .pill{display:inline-flex;gap:8px;align-items:center;font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.95}
-    .dot{width:10px;height:10px;border-radius:50%}
-    .dot.degree{background:var(--deg)}
-    .dot.prof{background:var(--pro)}
-    .legend-note{font-size:13px;opacity:.8;line-height:1.2}
+    .legend-note{font-size:13px;opacity:.75}
+    .legend-hint{
+      margin-left:auto;              /* pushes it to the right */
+      font-size:12px;
+      opacity:.6;
+      white-space:nowrap;
+    }
+    @media (max-width:720px){
+      .legend-hint{margin-left:0;opacity:.7}  /* stacks naturally on mobile */
+    }
 
     /* ===== Timeline (single, consistent layout system) ===== */
     .timeline-wrap{margin-top:10px}
@@ -333,9 +338,13 @@
       <div class="legend">
         <span class="pill"><span class="dot degree"></span> Degree</span>
         <span class="pill"><span class="dot prof"></span> Professional</span>
+      
         <span class="legend-note">
-          appointments / fellowships / employment<br/>
-          <span style="opacity:.85">Click a milestone for details.</span>
+          appointments / fellowships / employment
+        </span>
+      
+        <span class="legend-hint">
+          Click a milestone for details
         </span>
       </div>
 
