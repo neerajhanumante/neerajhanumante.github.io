@@ -25,12 +25,12 @@
     .card{border:1px solid #ddd;border-radius:14px;padding:16px 16px;margin:14px 0;background:#fff}
     .meta{font-size:14px;opacity:.8;margin-top:10px}
 
-    /* Timeline */
+    /* ===== Timeline (UPDATED) ===== */
     .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 2px}
     .pill{display:inline-flex;gap:8px;align-items:center;font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.95}
     .dot{width:10px;height:10px;border-radius:50%}
-    .dot.edu{background:#2563eb}
-    .dot.work{background:#16a34a}
+    .dot.degree{background:#2563eb}
+    .dot.prof{background:#16a34a}
 
     .timeline-wrap{margin-top:10px}
     .timeline{
@@ -53,9 +53,10 @@
       transform:translateX(-50%);
       cursor:pointer;
       text-align:center;
-      min-width:120px;
+      min-width:110px;
       user-select:none;
     }
+    /* Start year only */
     .ms .when{font-size:12px;opacity:.75;margin-bottom:6px;white-space:nowrap}
     .ms .bubble{
       width:16px;height:16px;border-radius:50%;
@@ -64,17 +65,19 @@
       background:#111;
       box-shadow:0 0 0 3px #fafafa;
     }
-    .ms.edu .bubble{background:#2563eb;border-color:#2563eb}
-    .ms.work .bubble{background:#16a34a;border-color:#16a34a}
+    .ms.degree .bubble{background:#2563eb;border-color:#2563eb}
+    .ms.prof .bubble{background:#16a34a;border-color:#16a34a}
 
+    /* Org-only label in overview */
     .ms .label{
       font-size:12px;
-      opacity:.9;
+      opacity:.92;
       margin-top:8px;
       line-height:1.25;
       white-space:nowrap;
     }
-    .ms .sub{font-size:12px;opacity:.7;white-space:nowrap}
+    /* hide sub-line in overview (location moved to modal) */
+    .ms .sub{display:none}
 
     .ms:hover .bubble{transform:scale(1.06)}
     .ms:focus-within .bubble{transform:scale(1.08)}
@@ -83,6 +86,21 @@
       padding:2px 6px;border-radius:10px;
     }
     .ms a:focus{box-shadow:0 0 0 3px rgba(17,17,17,.15)}
+
+    /* "Now" marker for current role */
+    .now-badge{
+      display:inline-block;
+      margin-top:6px;
+      font-size:11px;
+      border:1px solid #111;
+      border-radius:999px;
+      padding:2px 8px;
+      background:#fff;
+      opacity:.95;
+    }
+    .ms.now .bubble{
+      box-shadow:0 0 0 3px #fafafa, 0 0 0 6px rgba(22,163,74,.20);
+    }
 
     /* Details (source content) */
     details{border:1px solid #ddd;border-radius:14px;background:#fff;margin:12px 0}
@@ -98,15 +116,40 @@
     }
     details > summary::-webkit-details-marker{display:none}
     .summary-left{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+
     .badge{
-      font-size:12px;border:1px solid #111;border-radius:999px;padding:3px 9px;opacity:.9
+      font-size:12px;border:1px solid #111;border-radius:999px;padding:3px 9px;opacity:.95
     }
-    .badge.edu{border-color:#2563eb;color:#2563eb}
-    .badge.work{border-color:#16a34a;color:#16a34a}
+    .badge.degree{border-color:#2563eb;color:#2563eb}
+    .badge.prof{border-color:#16a34a;color:#16a34a}
+
     .summary-right{font-size:12px;opacity:.75;white-space:nowrap}
     .details-body{padding:0 14px 14px}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 10px}
     .chip{font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.9}
+
+    /* Step markers (used only inside details) */
+    .steps{
+      border:1px solid #eee;
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fbfbfb;
+      margin:12px 0;
+      font-size:14px;
+    }
+    .steps .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .steps .step{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      border:1px solid #111;
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:12px;
+      opacity:.92;
+      background:#fff;
+    }
+    .steps .arrow{opacity:.6;font-size:12px}
 
     /* Hide the long details list by default (modal will show content). */
     .details-source{display:none}
@@ -134,14 +177,13 @@
     .modal-close:hover{background:#f3f3f3}
     .modal-body{padding:14px 16px 16px;background:#fff;border-bottom-left-radius:16px;border-bottom-right-radius:16px}
     .modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-    .modal-meta{font-size:14px;opacity:.85;margin-top:10px}
-    .modal-body ul{margin:8px 0 0 22px;font-size:16px;line-height:1.5}
 
-    /* Responsive: timeline becomes vertical-ish on narrow screens */
+    /* Responsive: stacked two-row timeline on narrow screens */
     @media (max-width: 720px){
       .ms{min-width:auto}
-      .ms .label,.ms .sub{white-space:normal}
-      .milestones{height:96px}
+      .ms .label{white-space:normal}
+      .milestones{height:128px}
+      .ms.row2{top:56px}
       dialog#milestoneDialog{width:calc(100% - 20px)}
     }
   </style>
@@ -172,89 +214,90 @@
 
     <div class="card timeline-wrap">
       <div class="legend">
-        <span class="pill"><span class="dot edu"></span> Education</span>
-        <span class="pill"><span class="dot work"></span> Work</span>
+        <span class="pill"><span class="dot degree"></span> Degree</span>
+        <span class="pill"><span class="dot prof"></span> Professional <span style="opacity:.75"> (appointments / fellowships / employment)</span></span>
         <span class="meta" style="margin:0">Click a milestone for details.</span>
       </div>
 
       <div class="timeline" role="navigation" aria-label="Career timeline">
         <div class="line"></div>
 
-        <!-- Milestones -->
+        <!-- Milestones: overview = start year + org only (no location) -->
         <div class="milestones" id="milestones">
-          <!-- EDU -->
-          <div class="ms edu" style="left:0%">
-            <a href="#" data-open="m-be">
-              <div class="when">2004–2008</div>
+          <!-- DEGREE -->
+          <div class="ms degree" style="left:2.5%">
+            <a href="#" data-open="m-be"
+               title="RTM Nagpur University • Nagpur, India • 2004–2008">
+              <div class="when">2004</div>
               <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>B.E.</b></div>
-              <div class="sub">Nagpur, India</div>
+              <div class="label"><b>RTM Nagpur Univ.</b></div>
             </a>
           </div>
 
-          <div class="ms edu" style="left:19.05%">
-            <a href="#" data-open="m-mtech">
-              <div class="when">2008–2010</div>
+          <div class="ms degree" style="left:19.05%">
+            <a href="#" data-open="m-mtech"
+               title="IIT Bombay • Mumbai, India • 2008–2010">
+              <div class="when">2008</div>
               <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>M.Tech.</b></div>
-              <div class="sub">Mumbai, India</div>
+              <div class="label"><b>IIT Bombay</b></div>
             </a>
           </div>
 
-          <!-- WORK -->
-          <div class="ms work" style="left:28.57%">
-            <a href="#" data-open="m-aerb">
-              <div class="when">2010–2015</div>
+          <!-- PROFESSIONAL -->
+          <div class="ms prof" style="left:28.57%">
+            <a href="#" data-open="m-aerb"
+               title="Atomic Energy Regulatory Board (AERB) • Mumbai, India • 2010–2015">
+              <div class="when">2010</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>AERB</b></div>
-              <div class="sub">Mumbai, India</div>
             </a>
           </div>
 
-          <!-- EDU (PhD) -->
-          <div class="ms edu" style="left:47.62%">
-            <a href="#" data-open="m-phd">
-              <div class="when">2014–2021</div>
+          <!-- PhD = Degree + Professional (shown as Degree marker in overview; dual badges inside modal) -->
+          <div class="ms degree" style="left:47.62%">
+            <a href="#" data-open="m-phd"
+               title="IIT Bombay – Monash University • Mumbai / Melbourne • 2014–2021">
+              <div class="when">2014</div>
               <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>Ph.D.</b></div>
-              <div class="sub">Mumbai + Monash</div>
+              <div class="label"><b>IITB–Monash</b></div>
             </a>
           </div>
 
-          <!-- WORK -->
-          <div class="ms work" style="left:80.95%">
-            <a href="#" data-open="m-iitbpostdoc">
-              <div class="when">2021–2022</div>
+          <!-- PROFESSIONAL -->
+          <div class="ms prof row2" style="left:80.95%">
+            <a href="#" data-open="m-iitbpostdoc"
+               title="IIT Bombay (Postdoc) • Mumbai, India • 2021–2022">
+              <div class="when">2021</div>
               <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>IITB (Postdoc)</b></div>
-              <div class="sub">Mumbai, India</div>
+              <div class="label"><b>IIT Bombay</b></div>
             </a>
           </div>
 
-          <div class="ms work" style="left:85.71%">
-            <a href="#" data-open="m-ut">
-              <div class="when">2022–2023</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>UT Austin</b></div>
-              <div class="sub">Austin, TX</div>
-            </a>
-          </div>
-
-          <div class="ms work" style="left:90.48%">
-            <a href="#" data-open="m-lifelink">
+          <div class="ms prof row2" style="left:85.71%">
+            <a href="#" data-open="m-ut"
+               title="UT Austin • Austin, TX, USA • 2022–2023">
               <div class="when">2022</div>
               <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>Consulting</b></div>
-              <div class="sub">Mumbai, India</div>
+              <div class="label"><b>UT Austin</b></div>
             </a>
           </div>
 
-          <div class="ms work" style="left:95.24%">
-            <a href="#" data-open="m-argonne">
-              <div class="when">2023–Present</div>
+          <div class="ms prof row2" style="left:90.48%">
+            <a href="#" data-open="m-lifelink"
+               title="Life Link Eco Technologies • Mumbai, India • 2022">
+              <div class="when">2022</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>Life Link</b></div>
+            </a>
+          </div>
+
+          <div class="ms prof now row2" style="left:97.5%">
+            <a href="#" data-open="m-argonne"
+               title="Argonne National Laboratory • United States • 2023–Present">
+              <div class="when">2023</div>
               <div class="bubble" aria-hidden="true"></div>
               <div class="label"><b>Argonne</b></div>
-              <div class="sub">US</div>
+              <div class="now-badge">Now</div>
             </a>
           </div>
         </div>
@@ -282,27 +325,28 @@
 
     <p class="meta">© <span id="yr"></span> Neeraj Hanumante</p>
 
-    <!-- ===== Source details (hidden) =====
-         These remain your single source of truth; the modal reads from them.
-         If later you want, we can add a "Show full details list" toggle. -->
+    <!-- ===== Source details (hidden): modal reads from these ===== -->
     <div class="details-source" id="detailsSource">
 
       <details id="m-argonne">
         <summary>
           <span class="summary-left">
-            <span class="badge work">Work</span>
+            <span class="badge prof">Professional</span>
             Argonne National Laboratory — Postdoctoral Appointee
           </span>
           <span class="summary-right">Nov 2023 – Present • United States</span>
         </summary>
         <div class="details-body">
           <div class="chips">
-            <span class="chip">GREET</span><span class="chip">Industrial screening</span><span class="chip">GHGRP/FLIGHT</span><span class="chip">LCA + TEA</span><span class="chip">QA/QC datasets</span>
+            <span class="chip">GREET</span>
+            <span class="chip">Industrial screening</span>
+            <span class="chip">LCA + TEA</span>
+            <span class="chip">QA/QC datasets</span>
+            <span class="chip">GHGRP/FLIGHT</span>
           </div>
           <ul>
             <li>Facility-level decarbonization screening across 300+ industrial sites (refining, ammonia, steel, cement, data centers).</li>
             <li>Life-cycle emissions drivers using GREET with review-ready documentation and transparent assumptions.</li>
-            <li>Integrated GHGRP/FLIGHT data for facility selection, baseline characterization, and input cross-checking.</li>
           </ul>
           <div class="meta"><b>Location:</b> United States (Argonne National Laboratory)</div>
         </div>
@@ -311,7 +355,7 @@
       <details id="m-ut">
         <summary>
           <span class="summary-left">
-            <span class="badge work">Work</span>
+            <span class="badge prof">Professional</span>
             The University of Texas at Austin — Postdoctoral Fellow
           </span>
           <span class="summary-right">Jul 2022 – Oct 2023 • Austin, TX</span>
@@ -332,7 +376,7 @@
       <details id="m-lifelink">
         <summary>
           <span class="summary-left">
-            <span class="badge work">Work</span>
+            <span class="badge prof">Professional</span>
             Life Link Eco Technologies — Sustainability Consultant (Freelance)
           </span>
           <span class="summary-right">Mar 2022 – Jun 2022 • Mumbai, India</span>
@@ -352,7 +396,7 @@
       <details id="m-iitbpostdoc">
         <summary>
           <span class="summary-left">
-            <span class="badge work">Work</span>
+            <span class="badge prof">Professional</span>
             Indian Institute of Technology Bombay — Postdoctoral Fellow
           </span>
           <span class="summary-right">Mar 2021 – Mar 2022 • Mumbai, India</span>
@@ -370,44 +414,75 @@
         </div>
       </details>
 
+      <!-- PhD: Degree + Professional + Melbourne step marker -->
       <details id="m-phd">
         <summary>
           <span class="summary-left">
-            <span class="badge edu">Education</span>
-            IIT Bombay – Monash University — Doctoral Researcher (Ph.D.)
+            <span class="badge degree">Degree</span>
+            <span class="badge prof">Professional</span>
+            IIT Bombay – Monash University — Doctoral Research (Ph.D.)
           </span>
-          <span class="summary-right">Dec 2014 – Jan 2021 • Mumbai + Monash</span>
+          <span class="summary-right">Dec 2014 – Jan 2021 • Mumbai + Melbourne</span>
         </summary>
         <div class="details-body">
           <div class="chips">
             <span class="chip">Circular economy</span><span class="chip">Diffusion (S-curve)</span><span class="chip">Consumer behavior</span><span class="chip">System dynamics</span>
           </div>
+
+          <div class="steps" aria-label="PhD progression">
+            <div class="row">
+              <span class="step">Mumbai (IIT Bombay)</span>
+              <span class="arrow">→</span>
+              <span class="step">Melbourne (2018–2019)</span>
+              <span class="arrow">→</span>
+              <span class="step">Completion</span>
+            </div>
+            <div class="meta" style="margin-top:8px">
+              <b>Support:</b> Prime Minister’s Fellowship for Doctoral Research (stipend-supported); industry partner: Tata Chemicals Ltd.
+            </div>
+          </div>
+
           <ul>
             <li>Developed a circular-economy submodel using recycling-rate (waste diversion) dynamics within an integrated global sustainability framework.</li>
             <li>Evaluated how uptake trajectories and consumption-growth assumptions shape sustainability outcomes.</li>
             <li>Assessed consumer purchase behavior and limitations of direct financial incentives as a standalone adoption lever.</li>
           </ul>
-          <div class="meta"><b>Location:</b> Mumbai, India + Monash University (joint program)</div>
+
+          <div class="meta"><b>Location:</b> Mumbai, India + Melbourne, Australia (joint program)</div>
         </div>
       </details>
 
+      <!-- AERB: step marker for C → D -->
       <details id="m-aerb">
         <summary>
           <span class="summary-left">
-            <span class="badge work">Work</span>
+            <span class="badge prof">Professional</span>
             Atomic Energy Regulatory Board (AERB), Govt. of India — Scientific Officer
           </span>
           <span class="summary-right">Aug 2010 – Jan 2015 • Mumbai, India</span>
         </summary>
         <div class="details-body">
           <div class="chips">
-            <span class="chip">Technical review</span><span class="chip">Regulatory inspections</span><span class="chip">Meeting coordination</span><span class="chip">Traceable documentation</span>
+            <span class="chip">Technical review</span>
+            <span class="chip">Regulatory inspections</span>
+            <span class="chip">Meeting coordination</span>
+            <span class="chip">Traceable documentation</span>
           </div>
+
+          <div class="steps" aria-label="AERB progression">
+            <div class="row">
+              <span class="step">Scientific Officer C (2010–2013): 3 areas, 2 inspections</span>
+              <span class="arrow">→</span>
+              <span class="step">Scientific Officer D (2013–2015): +6 areas (total 9), inspections total 8</span>
+            </div>
+          </div>
+
           <ul>
             <li>Supported the regulatory review and inspection lifecycle for major power projects with evidence-traceable documentation.</li>
-            <li>Coordinated technical meetings for assigned areas (agenda/materials, minutes, follow-ups) to support timely closure of actions.</li>
+            <li>Coordinated technical meetings for assigned review areas (agenda/materials, minutes, follow-ups) and supported timely closure of actions.</li>
             <li>Participated in inspections across two sites; supported preparation and post-inspection corrective action communication.</li>
           </ul>
+
           <div class="meta"><b>Location:</b> Mumbai, India</div>
         </div>
       </details>
@@ -415,7 +490,7 @@
       <details id="m-mtech">
         <summary>
           <span class="summary-left">
-            <span class="badge edu">Education</span>
+            <span class="badge degree">Degree</span>
             Indian Institute of Technology Bombay — M.Tech., Energy Systems Engineering
           </span>
           <span class="summary-right">2008 – 2010 • Mumbai, India</span>
@@ -435,7 +510,7 @@
       <details id="m-be">
         <summary>
           <span class="summary-left">
-            <span class="badge edu">Education</span>
+            <span class="badge degree">Degree</span>
             RTM Nagpur University — B.E., Mechanical Engineering
           </span>
           <span class="summary-right">2004 – 2008 • Nagpur, India</span>
@@ -469,22 +544,12 @@
   </dialog>
 
   <script>
-    // ===== Modal helpers =====
     const dialog = document.getElementById("milestoneDialog");
     const mdTitle = document.getElementById("mdTitle");
     const mdSub = document.getElementById("mdSub");
     const mdBody = document.getElementById("mdBody");
     const mdBadges = document.getElementById("mdBadges");
     const mdClose = document.getElementById("mdClose");
-
-    function escapeHtml(s){
-      return String(s)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
 
     function extractAndShow(id){
       const src = document.getElementById(id);
@@ -494,81 +559,46 @@
       const left = summary ? summary.querySelector(".summary-left") : null;
       const right = summary ? summary.querySelector(".summary-right") : null;
 
-      // Badge (edu/work) and title
-      const badgeEl = left ? left.querySelector(".badge") : null;
-      const badgeText = badgeEl ? badgeEl.textContent.trim() : "";
-      const badgeClass = badgeEl ? (badgeEl.classList.contains("edu") ? "edu" : "work") : "work";
+      // Badges (support multiple)
+      const badgeEls = left ? Array.from(left.querySelectorAll(".badge")) : [];
+      mdBadges.innerHTML = badgeEls.map(b => {
+        const cls = b.classList.contains("degree") ? "degree" : "prof";
+        const txt = b.textContent.trim();
+        return `<span class="badge ${cls}">${txt}</span>`;
+      }).join("");
 
-      // Title text without badge
-      let titleText = left ? left.textContent.trim() : "";
-      if(badgeText) titleText = titleText.replace(badgeText, "").trim();
-      mdTitle.textContent = titleText || "Details";
+      // Title without badges
+      let titleText = "Details";
+      if(left){
+        const clone = left.cloneNode(true);
+        clone.querySelectorAll(".badge").forEach(b => b.remove());
+        titleText = clone.textContent.trim() || "Details";
+      }
+      mdTitle.textContent = titleText;
       mdSub.textContent = right ? right.textContent.trim() : "";
 
-      mdBadges.innerHTML = badgeText
-        ? `<span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>`
-        : "";
+      // Body: use full details-body HTML so step markers render
+      const body = src.querySelector(".details-body");
+      mdBody.innerHTML = body ? body.innerHTML : "";
 
-      // chips
-      const chipEls = src.querySelectorAll(".chips .chip");
-      const chipsHtml = chipEls.length
-        ? `<div class="chips">${Array.from(chipEls).map(c => `<span class="chip">${escapeHtml(c.textContent.trim())}</span>`).join("")}</div>`
-        : "";
+      if(typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open","open");
 
-      // bullets
-      const liEls = src.querySelectorAll(".details-body ul li");
-      const bulletsHtml = liEls.length
-        ? `<ul>${Array.from(liEls).map(li => `<li>${escapeHtml(li.textContent.trim())}</li>`).join("")}</ul>`
-        : "";
-
-      // meta (location)
-      const metaEl = src.querySelector(".details-body .meta");
-      const metaHtml = metaEl ? `<div class="modal-meta">${metaEl.innerHTML}</div>` : "";
-
-      mdBody.innerHTML = `${chipsHtml}${bulletsHtml}${metaHtml}`;
-
-      // Open modal
-      if(typeof dialog.showModal === "function"){
-        dialog.showModal();
-      } else {
-        // Fallback (very old browsers): just show as block
-        dialog.setAttribute("open","open");
-      }
-
-      // Update hash without jump (keeps flexibility for deep links later)
-      try {
-        history.replaceState(null, "", "#" + id);
-      } catch(e) { /* ignore */ }
+      // Hash for deep-linking (no jump)
+      try { history.replaceState(null, "", "#" + id); } catch(e) {}
     }
 
-    // Close behavior
     mdClose.addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", (e) => {
-      // click outside modal content closes (native dialog backdrop clicks are on dialog itself)
-      const rect = dialog.getBoundingClientRect();
-      const inDialog = (
-        e.clientX >= rect.left && e.clientX <= rect.right &&
-        e.clientY >= rect.top && e.clientY <= rect.bottom
-      );
-      // If user clicked on the backdrop area (dialog element but outside content),
-      // native dialog already handles; this is a light extra.
-      if(!inDialog) dialog.close();
-    });
-    dialog.addEventListener("close", () => {
-      // Optional: clear hash when closing (comment out if you want the hash to remain)
-      // history.replaceState(null, "", location.pathname);
-    });
 
-    // Milestone click: prevent scroll/jump; open modal
+    // Milestone click: open modal
     document.querySelectorAll('[data-open]').forEach(a => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        const id = a.getAttribute('data-open');
-        extractAndShow(id);
+        extractAndShow(a.getAttribute('data-open'));
       });
     });
 
-    // Open modal if arriving with a hash (no scroll)
+    // If arriving with a hash, open that modal
     window.addEventListener('load', () => {
       const id = (location.hash || "").replace("#","");
       if(id) extractAndShow(id);
