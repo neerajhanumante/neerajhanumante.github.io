@@ -25,82 +25,195 @@
     .card{border:1px solid #ddd;border-radius:14px;padding:16px 16px;margin:14px 0;background:#fff}
     .meta{font-size:14px;opacity:.8;margin-top:10px}
 
-    /* ===== Timeline (UPDATED) ===== */
-    .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 2px}
+    /* Colors */
+    :root{
+      --deg:#2563eb;   /* Degree */
+      --pro:#16a34a;   /* Professional */
+      --line:#d9d9d9;
+      --soft:#fafafa;
+      --ink:#111;
+    }
+
+    /* Timeline */
+    .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px}
     .pill{display:inline-flex;gap:8px;align-items:center;font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.95}
     .dot{width:10px;height:10px;border-radius:50%}
-    .dot.degree{background:#2563eb}
-    .dot.prof{background:#16a34a}
+    .dot.degree{background:var(--deg)}
+    .dot.prof{background:var(--pro)}
+    .legend-note{
+      font-size:13px;opacity:.8;
+      line-height:1.2;
+    }
 
     .timeline-wrap{margin-top:10px}
+
+    /* Make the line pass through the dots by fixing a single Y coordinate */
     .timeline{
       position:relative;
       border:1px solid #eee;
       border-radius:14px;
-      padding:18px 14px 22px;
-      background:#fafafa;
+      padding:16px 14px 20px;
+      background:var(--soft);
       overflow:hidden;
     }
-    .line{height:3px;background:#d9d9d9;border-radius:99px;margin:14px 6px 22px}
 
-    .milestones{
+    /* One rail line, absolutely positioned */
+    .rail{
       position:relative;
-      margin-top:-38px; /* pull dots onto the line */
-      height:72px;
+      height:92px;
+    }
+    .rail-line{
+      position:absolute;
+      left:10px; right:10px;
+      top:36px;
+      height:3px;
+      background:var(--line);
+      border-radius:99px;
+    }
+
+    /* Sub-phase bands (non-milestone “step markers”) */
+    .ranges{
+      position:absolute;
+      left:10px; right:10px;
+      top:46px; /* slightly below the main line */
+      height:16px;
+      pointer-events:none; /* avoids blocking clicks on milestones */
+    }
+    .range{
+      position:absolute;
+      top:4px;
+      height:6px;
+      border-radius:999px;
+      opacity:.95;
+      background:rgba(17,17,17,.12);
+    }
+    .range.degree{background:rgba(37,99,235,.20)}
+    .range.prof{background:rgba(22,163,74,.20)}
+    .range.mixed{
+      background:linear-gradient(90deg, rgba(37,99,235,.22) 0 50%, rgba(22,163,74,.22) 50% 100%);
+    }
+
+    /* Step ticks inside ranges */
+    .range .tick{
+      position:absolute;
+      top:-3px;
+      width:2px;
+      height:12px;
+      background:rgba(17,17,17,.55);
+      border-radius:2px;
+    }
+    .range .tick::after{
+      content:"";
+      position:absolute;
+      left:-3px;
+      top:-1px;
+      width:8px;height:8px;
+      border-radius:99px;
+      background:#fff;
+      border:1px solid rgba(17,17,17,.35);
+    }
+
+    /* Hover label for the range (subtle “there’s something inside”) */
+    .range[data-label]{
+      pointer-events:auto; /* allow hover tooltip on the band itself */
+      cursor:help;
+    }
+    .range[data-label]:hover::after,
+    .range[data-label]:focus::after{
+      content:attr(data-label);
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:14px;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:10px;
+      padding:6px 10px;
+      font-size:12px;
+      opacity:.95;
+      white-space:nowrap;
+      box-shadow:0 10px 30px rgba(0,0,0,.10);
+    }
+
+    /* Milestones live on top of the rail */
+    .milestones{
+      position:absolute;
+      left:0; right:0;
+      top:0;
+      height:92px;
+      padding:0 18px;     /* fixes edge clipping */
+      box-sizing:border-box;
     }
     .ms{
       position:absolute;
+      top:18px;
       transform:translateX(-50%);
       cursor:pointer;
       text-align:center;
-      min-width:110px;
+      min-width:0;
       user-select:none;
     }
-    /* Start year only */
-    .ms .when{font-size:12px;opacity:.75;margin-bottom:6px;white-space:nowrap}
-    .ms .bubble{
-      width:16px;height:16px;border-radius:50%;
-      margin:0 auto;
-      border:2px solid #111;
-      background:#111;
-      box-shadow:0 0 0 3px #fafafa;
-    }
-    .ms.degree .bubble{background:#2563eb;border-color:#2563eb}
-    .ms.prof .bubble{background:#16a34a;border-color:#16a34a}
-
-    /* Org-only label in overview */
-    .ms .label{
-      font-size:12px;
-      opacity:.92;
-      margin-top:8px;
-      line-height:1.25;
-      white-space:nowrap;
-    }
-    /* hide sub-line in overview (location moved to modal) */
-    .ms .sub{display:none}
-
-    .ms:hover .bubble{transform:scale(1.06)}
-    .ms:focus-within .bubble{transform:scale(1.08)}
     .ms a{
       color:inherit;text-decoration:none;display:block;outline:none;
       padding:2px 6px;border-radius:10px;
     }
     .ms a:focus{box-shadow:0 0 0 3px rgba(17,17,17,.15)}
 
-    /* "Now" marker for current role */
-    .now-badge{
-      display:inline-block;
+    /* Show only start year + org (no location here) */
+    .ms .when{font-size:12px;opacity:.75;margin-bottom:6px;white-space:nowrap}
+    .ms .label{
+      font-size:12px;
+      opacity:.92;
+      margin-top:8px;
+      line-height:1.15;
+      white-space:nowrap;
+      max-width:90px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-left:auto;margin-right:auto;
+    }
+    .ms .sub{display:none} /* location moved to modal */
+
+    /* Dot aligned to the rail-line center */
+    .ms .bubble{
+      width:16px;height:16px;border-radius:50%;
+      margin:0 auto;
+      border:2px solid var(--ink);
+      background:var(--ink);
+      box-shadow:0 0 0 3px var(--soft);
+    }
+    .ms.degree .bubble{background:var(--deg);border-color:var(--deg)}
+    .ms.prof .bubble{background:var(--pro);border-color:var(--pro)}
+    .ms.mixed .bubble{
+      background:linear-gradient(90deg, var(--deg) 0 50%, var(--pro) 50% 100%);
+      border-color:rgba(17,17,17,.65);
+    }
+
+    /* Click affordance: subtle underline on hover */
+    .ms:hover .label{ text-decoration:underline; text-underline-offset:3px }
+    .ms:hover .bubble{transform:scale(1.06)}
+    .ms:focus-within .bubble{transform:scale(1.08)}
+
+    /* Make the current role obvious */
+    .ms.current .bubble{
+      box-shadow:
+        0 0 0 3px var(--soft),
+        0 0 0 6px rgba(22,163,74,.18);
+    }
+    .ms.current .nowtag{
       margin-top:6px;
+      display:inline-block;
       font-size:11px;
-      border:1px solid #111;
-      border-radius:999px;
+      border:1px solid rgba(17,17,17,.45);
       padding:2px 8px;
+      border-radius:999px;
+      opacity:.85;
       background:#fff;
-      opacity:.95;
     }
-    .ms.now .bubble{
-      box-shadow:0 0 0 3px #fafafa, 0 0 0 6px rgba(22,163,74,.20);
-    }
+
+    /* Stagger dense region labels (right side) */
+    .ms.row2{ top:52px; }         /* pushes down to a second row */
+    .ms.row2 .bubble{ box-shadow:0 0 0 3px var(--soft); }
 
     /* Details (source content) */
     details{border:1px solid #ddd;border-radius:14px;background:#fff;margin:12px 0}
@@ -116,40 +229,15 @@
     }
     details > summary::-webkit-details-marker{display:none}
     .summary-left{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-
     .badge{
-      font-size:12px;border:1px solid #111;border-radius:999px;padding:3px 9px;opacity:.95
+      font-size:12px;border:1px solid #111;border-radius:999px;padding:3px 9px;opacity:.9
     }
-    .badge.degree{border-color:#2563eb;color:#2563eb}
-    .badge.prof{border-color:#16a34a;color:#16a34a}
-
+    .badge.degree{border-color:var(--deg);color:var(--deg)}
+    .badge.prof{border-color:var(--pro);color:var(--pro)}
     .summary-right{font-size:12px;opacity:.75;white-space:nowrap}
     .details-body{padding:0 14px 14px}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 10px}
     .chip{font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.9}
-
-    /* Step markers (used only inside details) */
-    .steps{
-      border:1px solid #eee;
-      border-radius:12px;
-      padding:10px 12px;
-      background:#fbfbfb;
-      margin:12px 0;
-      font-size:14px;
-    }
-    .steps .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .steps .step{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      border:1px solid #111;
-      border-radius:999px;
-      padding:4px 10px;
-      font-size:12px;
-      opacity:.92;
-      background:#fff;
-    }
-    .steps .arrow{opacity:.6;font-size:12px}
 
     /* Hide the long details list by default (modal will show content). */
     .details-source{display:none}
@@ -177,14 +265,30 @@
     .modal-close:hover{background:#f3f3f3}
     .modal-body{padding:14px 16px 16px;background:#fff;border-bottom-left-radius:16px;border-bottom-right-radius:16px}
     .modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+    .modal-meta{font-size:14px;opacity:.85;margin-top:10px}
+    .modal-body ul{margin:8px 0 0 22px;font-size:16px;line-height:1.5}
 
-    /* Responsive: stacked two-row timeline on narrow screens */
+    /* Optional: in-modal mini step line (just for showing sub-phases cleanly) */
+    .mini-steps{
+      margin:10px 0 8px;
+      padding:10px 10px;
+      background:#fafafa;
+      border:1px solid #eee;
+      border-radius:12px;
+      font-size:13px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .mini-steps .k{opacity:.75}
+    .mini-steps .v{font-weight:650}
+
     @media (max-width: 720px){
-      .ms{min-width:auto}
-      .ms .label{white-space:normal}
-      .milestones{height:128px}
-      .ms.row2{top:56px}
       dialog#milestoneDialog{width:calc(100% - 20px)}
+      /* On mobile, always use two rows for dense right region */
+      .ms.row2{ top:54px; }
+      .ms .label{max-width:78px}
     }
   </style>
 </head>
@@ -215,90 +319,104 @@
     <div class="card timeline-wrap">
       <div class="legend">
         <span class="pill"><span class="dot degree"></span> Degree</span>
-        <span class="pill"><span class="dot prof"></span> Professional <span style="opacity:.75"> (appointments / fellowships / employment)</span></span>
-        <span class="meta" style="margin:0">Click a milestone for details.</span>
+        <span class="pill"><span class="dot prof"></span> Professional</span>
+        <span class="legend-note">
+          appointments / fellowships / employment<br/>
+          <span style="opacity:.85">Click a milestone for details.</span>
+        </span>
       </div>
 
       <div class="timeline" role="navigation" aria-label="Career timeline">
-        <div class="line"></div>
+        <div class="rail">
+          <div class="rail-line"></div>
 
-        <!-- Milestones: overview = start year + org only (no location) -->
-        <div class="milestones" id="milestones">
-          <!-- DEGREE -->
-          <div class="ms degree" style="left:2.5%">
-            <a href="#" data-open="m-be"
-               title="RTM Nagpur University • Nagpur, India • 2004–2008">
-              <div class="when">2004</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>RTM Nagpur Univ.</b></div>
-            </a>
+          <!-- Sub-phase hints (non-milestone “step markers”) -->
+          <div class="ranges" id="ranges">
+            <!-- AERB: C → D around 2013 -->
+            <div class="range prof"
+                 data-start="2010" data-end="2015"
+                 data-steps="2013"
+                 data-label="AERB internal step: promotion (C → D)">
+            </div>
+
+            <!-- PhD: Mumbai → Melbourne → Mumbai (2018, 2019 as internal step years) -->
+            <div class="range mixed"
+                 data-start="2014" data-end="2021"
+                 data-steps="2018,2019"
+                 data-label="PhD phases: Mumbai → Melbourne → Mumbai">
+            </div>
           </div>
 
-          <div class="ms degree" style="left:19.05%">
-            <a href="#" data-open="m-mtech"
-               title="IIT Bombay • Mumbai, India • 2008–2010">
-              <div class="when">2008</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>IIT Bombay</b></div>
-            </a>
-          </div>
+          <!-- Milestones -->
+          <div class="milestones" id="milestones">
 
-          <!-- PROFESSIONAL -->
-          <div class="ms prof" style="left:28.57%">
-            <a href="#" data-open="m-aerb"
-               title="Atomic Energy Regulatory Board (AERB) • Mumbai, India • 2010–2015">
-              <div class="when">2010</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>AERB</b></div>
-            </a>
-          </div>
+            <div class="ms degree" style="left:0%" title="2004–2008 • B.E. (Degree)">
+              <a href="#" data-open="m-be">
+                <div class="when">2004</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>RTM Nagpur</b></div>
+              </a>
+            </div>
 
-          <!-- PhD = Degree + Professional (shown as Degree marker in overview; dual badges inside modal) -->
-          <div class="ms degree" style="left:47.62%">
-            <a href="#" data-open="m-phd"
-               title="IIT Bombay – Monash University • Mumbai / Melbourne • 2014–2021">
-              <div class="when">2014</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>IITB–Monash</b></div>
-            </a>
-          </div>
+            <div class="ms degree" style="left:19.05%" title="2008–2010 • M.Tech. (Degree)">
+              <a href="#" data-open="m-mtech">
+                <div class="when">2008</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>IIT Bombay</b></div>
+              </a>
+            </div>
 
-          <!-- PROFESSIONAL -->
-          <div class="ms prof row2" style="left:80.95%">
-            <a href="#" data-open="m-iitbpostdoc"
-               title="IIT Bombay (Postdoc) • Mumbai, India • 2021–2022">
-              <div class="when">2021</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>IIT Bombay</b></div>
-            </a>
-          </div>
+            <div class="ms prof" style="left:28.57%" title="2010–2015 • AERB (Professional)">
+              <a href="#" data-open="m-aerb">
+                <div class="when">2010</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>AERB</b></div>
+              </a>
+            </div>
 
-          <div class="ms prof row2" style="left:85.71%">
-            <a href="#" data-open="m-ut"
-               title="UT Austin • Austin, TX, USA • 2022–2023">
-              <div class="when">2022</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>UT Austin</b></div>
-            </a>
-          </div>
+            <!-- PhD: half degree / half professional -->
+            <div class="ms mixed" style="left:47.62%" title="2014–2021 • IITB–Monash (Degree + Fellowship)">
+              <a href="#" data-open="m-phd">
+                <div class="when">2014</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>IITB–Monash</b></div>
+              </a>
+            </div>
 
-          <div class="ms prof row2" style="left:90.48%">
-            <a href="#" data-open="m-lifelink"
-               title="Life Link Eco Technologies • Mumbai, India • 2022">
-              <div class="when">2022</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>Life Link</b></div>
-            </a>
-          </div>
+            <!-- Dense region: stagger to reduce crowding -->
+            <div class="ms prof row2" style="left:80.95%" title="2021–2022 • IIT Bombay (Professional)">
+              <a href="#" data-open="m-iitbpostdoc">
+                <div class="when">2021</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>IIT Bombay</b></div>
+              </a>
+            </div>
 
-          <div class="ms prof now row2" style="left:97.5%">
-            <a href="#" data-open="m-argonne"
-               title="Argonne National Laboratory • United States • 2023–Present">
-              <div class="when">2023</div>
-              <div class="bubble" aria-hidden="true"></div>
-              <div class="label"><b>Argonne</b></div>
-              <div class="now-badge">Now</div>
-            </a>
+            <div class="ms prof" style="left:85.71%" title="2022–2023 • UT Austin (Professional)">
+              <a href="#" data-open="m-ut">
+                <div class="when">2022</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>UT Austin</b></div>
+              </a>
+            </div>
+
+            <div class="ms prof row2" style="left:90.48%" title="2022 • Consulting (Professional)">
+              <a href="#" data-open="m-lifelink">
+                <div class="when">2022</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>Life Link</b></div>
+              </a>
+            </div>
+
+            <div class="ms prof current" style="left:95.24%" title="2023–Present • Argonne (Professional)">
+              <a href="#" data-open="m-argonne">
+                <div class="when">2023</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>Argonne</b></div>
+                <span class="nowtag" aria-hidden="true">Now</span>
+              </a>
+            </div>
+
           </div>
         </div>
       </div>
@@ -325,7 +443,7 @@
 
     <p class="meta">© <span id="yr"></span> Neeraj Hanumante</p>
 
-    <!-- ===== Source details (hidden): modal reads from these ===== -->
+    <!-- ===== Source details (hidden) ===== -->
     <div class="details-source" id="detailsSource">
 
       <details id="m-argonne">
@@ -338,11 +456,7 @@
         </summary>
         <div class="details-body">
           <div class="chips">
-            <span class="chip">GREET</span>
-            <span class="chip">Industrial screening</span>
-            <span class="chip">LCA + TEA</span>
-            <span class="chip">QA/QC datasets</span>
-            <span class="chip">GHGRP/FLIGHT</span>
+            <span class="chip">GREET</span><span class="chip">Industrial screening</span><span class="chip">GHGRP/FLIGHT</span><span class="chip">LCA + TEA</span><span class="chip">QA/QC datasets</span>
           </div>
           <ul>
             <li>Facility-level decarbonization screening across 300+ industrial sites (refining, ammonia, steel, cement, data centers).</li>
@@ -366,8 +480,8 @@
           </div>
           <ul>
             <li>Developed U.S. economy flow/stock accounts using material flow analysis (MFA) and environmentally extended input–output (EEIO).</li>
-            <li>Harmonized multi-source datasets into consistent units and accounting structures for model use.</li>
             <li>Supported calibration and baseline behavior checks for a stock–flow consistent macroeconomic growth model.</li>
+            <li>Engaged with collaborators through technical discussions/feedback to refine assumptions and interpretation.</li>
           </ul>
           <div class="meta"><b>Location:</b> Austin, Texas, USA</div>
         </div>
@@ -407,52 +521,42 @@
           </div>
           <ul>
             <li>Developed the water-stress and scarcity-pricing module in a global FEW-nexus framework (6 regions × 3 sectors).</li>
-            <li>Defined water stress as sectoral demand / exploitable water availability and implemented scarcity-price feedback linked to GDP/capita.</li>
-            <li>Designed and executed a structured scenario suite with parameter consistency checks.</li>
+            <li>Designed and executed a structured scenario suite with parameter consistency checks and sensitivity analysis.</li>
+            <li>Produced peer-reviewed publications from this work (see Google Scholar).</li>
           </ul>
           <div class="meta"><b>Location:</b> Mumbai, India</div>
         </div>
       </details>
 
-      <!-- PhD: Degree + Professional + Melbourne step marker -->
+      <!-- PhD: two badges (Degree + Professional) -->
       <details id="m-phd">
         <summary>
           <span class="summary-left">
             <span class="badge degree">Degree</span>
             <span class="badge prof">Professional</span>
-            IIT Bombay – Monash University — Doctoral Research (Ph.D.)
+            IIT Bombay – Monash University — Doctoral Researcher (Ph.D.)
           </span>
-          <span class="summary-right">Dec 2014 – Jan 2021 • Mumbai + Melbourne</span>
+          <span class="summary-right">Dec 2014 – Jan 2021 • Mumbai + Monash</span>
         </summary>
         <div class="details-body">
+          <div class="mini-steps">
+            <span class="k">Phases:</span>
+            <span class="v">Mumbai (2014–2018)</span> →
+            <span class="v">Melbourne (2018–2019)</span> →
+            <span class="v">Mumbai (2019–2021)</span>
+          </div>
           <div class="chips">
             <span class="chip">Circular economy</span><span class="chip">Diffusion (S-curve)</span><span class="chip">Consumer behavior</span><span class="chip">System dynamics</span>
           </div>
-
-          <div class="steps" aria-label="PhD progression">
-            <div class="row">
-              <span class="step">Mumbai (IIT Bombay)</span>
-              <span class="arrow">→</span>
-              <span class="step">Melbourne (2018–2019)</span>
-              <span class="arrow">→</span>
-              <span class="step">Completion</span>
-            </div>
-            <div class="meta" style="margin-top:8px">
-              <b>Support:</b> Prime Minister’s Fellowship for Doctoral Research (stipend-supported); industry partner: Tata Chemicals Ltd.
-            </div>
-          </div>
-
           <ul>
             <li>Developed a circular-economy submodel using recycling-rate (waste diversion) dynamics within an integrated global sustainability framework.</li>
-            <li>Evaluated how uptake trajectories and consumption-growth assumptions shape sustainability outcomes.</li>
-            <li>Assessed consumer purchase behavior and limitations of direct financial incentives as a standalone adoption lever.</li>
+            <li>Quantified how adoption trajectories and consumer behavior shape sustainability outcomes; documented limitations of incentives as a standalone lever.</li>
           </ul>
-
-          <div class="meta"><b>Location:</b> Mumbai, India + Melbourne, Australia (joint program)</div>
+          <div class="meta"><b>Location:</b> Mumbai, India + Melbourne, Australia (2018–2019) + Monash University (joint program)</div>
         </div>
       </details>
 
-      <!-- AERB: step marker for C → D -->
+      <!-- AERB: keep one milestone, but show internal step in details -->
       <details id="m-aerb">
         <summary>
           <span class="summary-left">
@@ -462,27 +566,19 @@
           <span class="summary-right">Aug 2010 – Jan 2015 • Mumbai, India</span>
         </summary>
         <div class="details-body">
+          <div class="mini-steps">
+            <span class="k">Progression:</span>
+            <span class="v">Scientific Officer C (2010–2013)</span> →
+            <span class="v">Scientific Officer D (2013–2015)</span>
+          </div>
           <div class="chips">
-            <span class="chip">Technical review</span>
-            <span class="chip">Regulatory inspections</span>
-            <span class="chip">Meeting coordination</span>
-            <span class="chip">Traceable documentation</span>
+            <span class="chip">Technical review</span><span class="chip">Regulatory inspections</span><span class="chip">Meeting coordination</span><span class="chip">Traceable documentation</span>
           </div>
-
-          <div class="steps" aria-label="AERB progression">
-            <div class="row">
-              <span class="step">Scientific Officer C (2010–2013): 3 areas, 2 inspections</span>
-              <span class="arrow">→</span>
-              <span class="step">Scientific Officer D (2013–2015): +6 areas (total 9), inspections total 8</span>
-            </div>
-          </div>
-
           <ul>
             <li>Supported the regulatory review and inspection lifecycle for major power projects with evidence-traceable documentation.</li>
-            <li>Coordinated technical meetings for assigned review areas (agenda/materials, minutes, follow-ups) and supported timely closure of actions.</li>
+            <li>Coordinated technical meetings for assigned areas (agenda/materials, minutes, follow-ups) to support timely closure of actions.</li>
             <li>Participated in inspections across two sites; supported preparation and post-inspection corrective action communication.</li>
           </ul>
-
           <div class="meta"><b>Location:</b> Mumbai, India</div>
         </div>
       </details>
@@ -544,12 +640,22 @@
   </dialog>
 
   <script>
+    // ===== Modal helpers =====
     const dialog = document.getElementById("milestoneDialog");
     const mdTitle = document.getElementById("mdTitle");
     const mdSub = document.getElementById("mdSub");
     const mdBody = document.getElementById("mdBody");
     const mdBadges = document.getElementById("mdBadges");
     const mdClose = document.getElementById("mdClose");
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
     function extractAndShow(id){
       const src = document.getElementById(id);
@@ -559,50 +665,125 @@
       const left = summary ? summary.querySelector(".summary-left") : null;
       const right = summary ? summary.querySelector(".summary-right") : null;
 
-      // Badges (support multiple)
+      // Collect ALL badges (Degree / Professional)
       const badgeEls = left ? Array.from(left.querySelectorAll(".badge")) : [];
-      mdBadges.innerHTML = badgeEls.map(b => {
-        const cls = b.classList.contains("degree") ? "degree" : "prof";
-        const txt = b.textContent.trim();
-        return `<span class="badge ${cls}">${txt}</span>`;
+      const badgesHtml = badgeEls.map(b => {
+        const cls = b.classList.contains("degree") ? "degree" : (b.classList.contains("prof") ? "prof" : "");
+        return `<span class="badge ${cls}">${escapeHtml(b.textContent.trim())}</span>`;
       }).join("");
 
-      // Title without badges
-      let titleText = "Details";
-      if(left){
-        const clone = left.cloneNode(true);
-        clone.querySelectorAll(".badge").forEach(b => b.remove());
-        titleText = clone.textContent.trim() || "Details";
-      }
-      mdTitle.textContent = titleText;
+      // Title text without badge text
+      let titleText = left ? left.textContent.trim() : "";
+      badgeEls.forEach(b => {
+        titleText = titleText.replace(b.textContent.trim(), "").trim();
+      });
+
+      mdTitle.textContent = titleText || "Details";
       mdSub.textContent = right ? right.textContent.trim() : "";
+      mdBadges.innerHTML = badgesHtml;
 
-      // Body: use full details-body HTML so step markers render
-      const body = src.querySelector(".details-body");
-      mdBody.innerHTML = body ? body.innerHTML : "";
+      // chips
+      const chipEls = src.querySelectorAll(".chips .chip");
+      const chipsHtml = chipEls.length
+        ? `<div class="chips">${Array.from(chipEls).map(c => `<span class="chip">${escapeHtml(c.textContent.trim())}</span>`).join("")}</div>`
+        : "";
 
-      if(typeof dialog.showModal === "function") dialog.showModal();
-      else dialog.setAttribute("open","open");
+      // optional mini steps (if present)
+      const mini = src.querySelector(".mini-steps");
+      const miniHtml = mini ? `<div class="mini-steps">${mini.innerHTML}</div>` : "";
 
-      // Hash for deep-linking (no jump)
+      // bullets
+      const liEls = src.querySelectorAll(".details-body ul li");
+      const bulletsHtml = liEls.length
+        ? `<ul>${Array.from(liEls).map(li => `<li>${escapeHtml(li.textContent.trim())}</li>`).join("")}</ul>`
+        : "";
+
+      // meta (location)
+      const metaEl = src.querySelector(".details-body .meta");
+      const metaHtml = metaEl ? `<div class="modal-meta">${metaEl.innerHTML}</div>` : "";
+
+      mdBody.innerHTML = `${miniHtml}${chipsHtml}${bulletsHtml}${metaHtml}`;
+
+      // Open modal
+      if(typeof dialog.showModal === "function"){
+        dialog.showModal();
+      } else {
+        dialog.setAttribute("open","open");
+      }
+
+      // Update hash without jump
       try { history.replaceState(null, "", "#" + id); } catch(e) {}
     }
 
+    // Close behavior
     mdClose.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (e) => {
+      const rect = dialog.getBoundingClientRect();
+      const inDialog = (
+        e.clientX >= rect.left && e.clientX <= rect.right &&
+        e.clientY >= rect.top && e.clientY <= rect.bottom
+      );
+      if(!inDialog) dialog.close();
+    });
 
-    // Milestone click: open modal
+    // Milestone click: prevent scroll/jump; open modal
     document.querySelectorAll('[data-open]').forEach(a => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        extractAndShow(a.getAttribute('data-open'));
+        const id = a.getAttribute('data-open');
+        extractAndShow(id);
       });
     });
 
-    // If arriving with a hash, open that modal
+    // Build range positions + step ticks using years (so you don’t hand-calc %)
+    function yearToPct(y, startY, endY){
+      const clamped = Math.max(startY, Math.min(endY, y));
+      return ((clamped - startY) / (endY - startY)) * 100;
+    }
+
+    function layoutRanges(){
+      const startY = 2004;
+      const endY = new Date().getFullYear();
+      const ranges = document.querySelectorAll(".range[data-start][data-end]");
+      ranges.forEach(r => {
+        const s = parseFloat(r.getAttribute("data-start"));
+        const e = parseFloat(r.getAttribute("data-end"));
+        const left = yearToPct(s, startY, endY);
+        const right = yearToPct(e, startY, endY);
+        r.style.left = left + "%";
+        r.style.width = Math.max(0, right - left) + "%";
+
+        // ticks
+        const steps = (r.getAttribute("data-steps") || "")
+          .split(",")
+          .map(x => x.trim())
+          .filter(Boolean)
+          .map(Number);
+
+        // clear existing ticks
+        Array.from(r.querySelectorAll(".tick")).forEach(t => t.remove());
+
+        steps.forEach(yr => {
+          const t = document.createElement("span");
+          t.className = "tick";
+          const tPct = yearToPct(yr, s, e); // relative within range
+          t.style.left = tPct + "%";
+          r.appendChild(t);
+        });
+      });
+    }
+
+    // Init
     window.addEventListener('load', () => {
       const id = (location.hash || "").replace("#","");
       if(id) extractAndShow(id);
       document.getElementById("yr").textContent = new Date().getFullYear();
+      layoutRanges();
+    });
+
+    // Re-layout if the year changes (rare, but safe)
+    window.addEventListener('resize', () => {
+      layoutRanges();
     });
   </script>
 </body>
