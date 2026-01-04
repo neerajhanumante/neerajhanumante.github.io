@@ -6,6 +6,168 @@
   <title>Neeraj Hanumante</title>
   <meta name="description" content="Neeraj Hanumante — Decarbonization, LCA, and energy systems." />
   <style>
+        /* ===== Timeline core alignment: rail goes THROUGH dot centers ===== */
+    .timeline .rail{
+      position:relative;
+      /* more breathing room so labels don't clip */
+      padding:22px 18px 54px;
+      --railY: 44px;        /* adjust once; everything aligns to this */
+    }
+    
+    /* Ensure no clipping of labels inside the timeline card */
+    .timeline{ overflow: visible; } /* if you had overflow:hidden earlier */
+    
+    /* Rail line positioned at --railY */
+    .rail-line{
+      position:absolute;
+      left:18px; right:18px;
+      top: var(--railY);
+      height:3px;
+      background:#d9d9d9;
+      border-radius:999px;
+    }
+    
+    /* Milestones overlay lives in same rail box */
+    .milestones{
+      position:relative;
+      height:96px;          /* room for top/bottom labels */
+    }
+    
+    /* Each milestone is anchored at the rail Y */
+    .ms{
+      position:absolute;
+      top: var(--railY);
+      transform:translateX(-50%);
+      text-align:center;
+      min-width:110px;
+      user-select:none;
+    }
+    
+    /* Clickable area around the dot */
+    .ms a{
+      position:relative;
+      display:block;
+      padding:48px 8px 48px;
+      border-radius:10px;
+      text-decoration:none;
+      color:inherit;
+    }
+    .ms a:focus{ box-shadow:0 0 0 3px rgba(17,17,17,.15); outline:none; }
+    
+    /* The dot is absolute; its CENTER sits on the rail line */
+    .ms .bubble{
+      position:absolute;
+      left:50%;
+      top:0;
+      transform:translate(-50%,-50%);
+      width:16px;height:16px;border-radius:50%;
+      border:2px solid #111;
+      background:#111;
+      box-shadow:0 0 0 3px #fafafa;
+    }
+    
+    /* Category colors */
+    .ms.degree .bubble{ background:#2563eb; border-color:#2563eb; }
+    .ms.prof   .bubble{ background:#16a34a; border-color:#16a34a; }
+    
+    /* Mixed (PhD half/half) dot */
+    .ms.mixed .bubble{
+      border-color:#111;
+      background: linear-gradient(90deg, #2563eb 0 50%, #16a34a 50% 100%);
+    }
+    
+    /* Year stays near the dot (always) */
+    .ms .when{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:-26px;            /* close to the dot */
+      font-size:12px;
+      opacity:.78;
+      white-space:nowrap;
+    }
+    
+    /* Label switches above/below via classes */
+    .ms .label{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:12px;
+      opacity:.92;
+      white-space:nowrap;
+      line-height:1.2;
+    }
+    
+    /* Default: label BELOW the dot */
+    .ms.pos-bottom .label{ top:22px; }
+    
+    /* Alternate: label ABOVE the year (further from dot) */
+    .ms.pos-top .label{ top:-54px; }
+    
+    /* “Now” treatment */
+    .ms.current .bubble{
+      box-shadow:0 0 0 3px #fafafa, 0 0 0 8px rgba(22,163,74,.10);
+    }
+    .ms .nowtag{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:38px;
+      font-size:11px;
+      border:1px solid #111;
+      border-radius:999px;
+      padding:2px 8px;
+      background:#fff;
+    }
+    
+    /* Edge handling: keep first/last labels inside the box */
+    .ms.edge-left  .label, .ms.edge-left  .when{ transform:none; left:0; }
+    .ms.edge-right .label, .ms.edge-right .when{ transform:none; left:auto; right:0; }
+    
+    /* ===== Step markers / ranges (non-milestone) ===== */
+    .ranges{
+      position:absolute;
+      left:18px; right:18px;
+      top:0;
+      height:100%;
+      pointer-events:none; /* purely visual */
+    }
+    
+    /* Range “bar” (subtle) */
+    .range{
+      position:absolute;
+      top: var(--railY);
+      height:0; /* we draw children */
+    }
+    .range .bar{
+      position:absolute;
+      left:0; top:-7px;
+      height:14px;
+      border-radius:999px;
+      opacity:.12;
+    }
+    
+    /* Step tick marks */
+    .range .tick{
+      position:absolute;
+      top:-12px;
+      width:2px;
+      height:24px;
+      opacity:.55;
+      border-radius:2px;
+    }
+    
+    /* Color rules for ranges */
+    .range.prof  .bar{ background:#16a34a; }
+    .range.prof  .tick{ background:#16a34a; }
+    .range.mixed .bar{
+      background: linear-gradient(90deg, #2563eb 0 50%, #16a34a 50% 100%);
+    }
+    .range.mixed .tick{ background:#111; opacity:.45; }
+    
+    /* Optional: show a tiny caption on hover in the future (tooltip hook) */
+    .range[title]{}
+
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
     .wrap{max-width:980px;margin:0 auto;padding:56px 18px}
     h1{font-size:38px;margin:0}
@@ -787,6 +949,144 @@
     window.addEventListener('resize', () => {
       layoutRanges();
     });
+
+        // ====== Timeline helpers: ranges + soft alternation ======
+    (function(){
+      const rail = document.querySelector(".timeline .rail");
+      const rangesWrap = document.getElementById("ranges");
+      const milestonesWrap = document.getElementById("milestones");
+    
+      if(!rail || !rangesWrap || !milestonesWrap) return;
+    
+      // Use the same year span you used to compute left% (2004 → present)
+      const START_YEAR = 2004;
+      const END_YEAR = new Date().getFullYear();
+    
+      function pctFromYear(y){
+        return ((y - START_YEAR) / (END_YEAR - START_YEAR)) * 100;
+      }
+    
+      // ---- 1) Draw range bars + step ticks (non-milestone markers)
+      function renderRanges(){
+        const rangeEls = Array.from(rangesWrap.querySelectorAll(".range"));
+        rangeEls.forEach(r => {
+          // clear previous children
+          r.innerHTML = "";
+    
+          const start = parseFloat(r.dataset.start);
+          const end   = parseFloat(r.dataset.end);
+          const steps = (r.dataset.steps || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(Number);
+    
+          // range position in %
+          const leftPct = pctFromYear(start);
+          const rightPct = pctFromYear(end);
+          const widthPct = Math.max(0, rightPct - leftPct);
+    
+          r.style.left = leftPct + "%";
+          r.style.width = widthPct + "%";
+          if(r.dataset.label) r.title = r.dataset.label;
+    
+          // bar
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.width = "100%";
+          r.appendChild(bar);
+    
+          // ticks
+          steps.forEach(y => {
+            if(y < start || y > end) return;
+            const tick = document.createElement("div");
+            tick.className = "tick";
+            tick.style.left = ((y - start) / (end - start)) * 100 + "%";
+            r.appendChild(tick);
+          });
+        });
+      }
+    
+      // ---- 2) Soft alternation + collision-aware flip
+      function rectsOverlap(a, b){
+        return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+      }
+    
+      function applySoftAlternation(){
+        const ms = Array.from(milestonesWrap.querySelectorAll(".ms"));
+    
+        // Sort by their left percentage (from inline style)
+        ms.sort((a,b)=>{
+          const la = parseFloat((a.style.left || "0").replace("%",""));
+          const lb = parseFloat((b.style.left || "0").replace("%",""));
+          return la - lb;
+        });
+    
+        // Reset classes
+        ms.forEach(el => el.classList.remove("pos-top","pos-bottom","edge-left","edge-right"));
+    
+        // Edge classes for first/last to reduce clipping
+        ms.forEach(el => {
+          const left = parseFloat((el.style.left || "0").replace("%",""));
+          if(left <= 3) el.classList.add("edge-left");
+          if(left >= 97) el.classList.add("edge-right");
+        });
+    
+        // Initial strict alternation
+        ms.forEach((el, i) => {
+          el.classList.add(i % 2 === 0 ? "pos-bottom" : "pos-top");
+        });
+    
+        // Keep "Now" biased bottom unless it collides badly
+        const current = ms.find(el => el.classList.contains("current"));
+        if(current){
+          current.classList.remove("pos-top");
+          current.classList.add("pos-bottom");
+        }
+    
+        // Collision-aware flip pass (top group then bottom group)
+        function resolve(sideClass){
+          const group = ms.filter(el => el.classList.contains(sideClass));
+          let lastRect = null;
+    
+          group.forEach(el => {
+            const label = el.querySelector(".label");
+            if(!label) return;
+            const r = label.getBoundingClientRect();
+    
+            if(lastRect && rectsOverlap(r, lastRect)){
+              // flip
+              el.classList.toggle("pos-top");
+              el.classList.toggle("pos-bottom");
+            } else {
+              lastRect = r;
+            }
+          });
+        }
+    
+        // Run a couple passes to settle flips
+        resolve("pos-top");
+        resolve("pos-bottom");
+        resolve("pos-top");
+      }
+    
+      function rerun(){
+        renderRanges();
+    
+        // Wait for layout before collision checks
+        requestAnimationFrame(() => {
+          applySoftAlternation();
+        });
+      }
+    
+      // init + resize
+      window.addEventListener("load", rerun);
+      window.addEventListener("resize", rerun);
+    
+      // run now too (in case script is loaded late)
+      rerun();
+    })();
+
   </script>
 </body>
 </html>
