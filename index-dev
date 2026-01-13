@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neeraj Hanumante</title>
+  <meta name="description" content="Neeraj Hanumante — Decarbonization, LCA, and energy systems." />
+
+  <style>
+    :root{
+      --deg:#2563eb;   /* Degree */
+      --pro:#16a34a;   /* Professional */
+      --line:#d9d9d9;
+      --soft:#fafafa;
+      --ink:#111;
+    }
+
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
+    .wrap{max-width:980px;margin:0 auto;padding:56px 18px}
+    h1{font-size:38px;margin:0}
+    .tag{font-size:16px;opacity:.9;margin:8px 0 16px}
+    h2{font-size:22px;margin:34px 0 10px}
+    p{font-size:18px;line-height:1.55;margin:10px 0 18px}
+    ul{margin:8px 0 18px 22px;font-size:18px;line-height:1.55}
+
+    /* Header */
+    .topbar{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    .nameblock{min-width:260px}
+    .navbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .navbtns a{display:inline-block;padding:10px 12px;border:1px solid #111;border-radius:10px;text-decoration:none;color:#111}
+    .navbtns a:hover{background:#f3f3f3}
+
+    /* Cards */
+    .card{border:1px solid #ddd;border-radius:14px;padding:16px 16px;margin:14px 0;background:#fff}
+    .meta{font-size:14px;opacity:.8;margin-top:10px}
+
+    /* Legend */
+    .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 6px}
+    .legend-note{font-size:13px;opacity:.75}
+    .legend-hint{
+      margin-left:auto;              /* pushes it to the right */
+      font-size:12px;
+      opacity:.6;
+      white-space:nowrap;
+    }
+    @media (max-width:720px){
+      .legend-hint{margin-left:0;opacity:.7}  /* stacks naturally on mobile */
+    }
+   .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      font-size:13px;
+      border:1px solid #111;
+      border-radius:999px;
+      padding:4px 10px;
+      opacity:.95;
+    }
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.degree{background:var(--deg)}
+    .dot.prof{background:var(--pro)}
+  
+    @media (max-width:720px){
+      .legend-hint{margin-left:0;opacity:.7}
+    }
+
+    /* ===== Timeline (single, consistent layout system) ===== */
+    .timeline-wrap{margin-top:10px}
+
+    .timeline{
+      position:relative;
+      border:1px solid #eee;
+      border-radius:14px;
+      padding:14px 14px;
+      background:var(--soft);
+      overflow:visible; /* allow above/below labels without clipping */
+    }
+
+    /* Rail defines a single Y coordinate that everything aligns to */
+    .timeline .rail{
+      position:relative;
+      height:160px;     /* gives room for labels above + below */
+      padding:0;
+      --railY: 80px;    /* line passes through dot centers */
+    }
+
+    .rail-line{
+      position:absolute;
+      left:18px; right:18px;
+      top:var(--railY);
+      height:3px;
+      background:var(--line);
+      border-radius:999px;
+    }
+
+    /* Non-milestone “step markers” (ranges) live behind dots */
+    .ranges{
+      position:absolute;
+      left:18px; right:18px;
+      top:0;
+      height:100%;
+      pointer-events:none; /* don't block milestone clicks */
+      z-index:1;
+    }
+    .range{
+      position:absolute;
+      top:var(--railY);
+      height:0;
+    }
+    .range .bar{
+      position:absolute;
+      left:0;
+      top:10px;              /* slightly below the main rail line */
+      height:12px;
+      width:100%;
+      border-radius:999px;
+      opacity:.14;
+    }
+    .range .tick{
+      position:absolute;
+      top:6px;               /* aligns with bar */
+      width:2px;
+      height:20px;
+      border-radius:2px;
+      opacity:.55;
+    }
+
+    .range.prof .bar{ background:var(--pro); }
+    .range.prof .tick{ background:var(--pro); }
+
+    .range.mixed .bar{
+      background: linear-gradient(90deg, var(--deg) 0 50%, var(--pro) 50% 100%);
+    }
+    .range.mixed .tick{ background:var(--ink); opacity:.38; }
+
+    /* Optional tooltip on the range itself */
+    .range[data-label]{ pointer-events:auto; cursor:help; }
+    .range[data-label]:hover::after{
+      content:attr(data-label);
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:32px;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:10px;
+      padding:6px 10px;
+      font-size:12px;
+      white-space:nowrap;
+      box-shadow:0 10px 30px rgba(0,0,0,.10);
+      opacity:.97;
+    }
+
+    /* Milestones overlay */
+    .milestones{
+      position:absolute;
+      left:18px; right:18px;
+      top:0;
+      height:100%;
+      z-index:2;
+    }
+
+    /* Each milestone is centered on the rail */
+    .ms{
+      position:absolute;
+      top:var(--railY);
+      transform:translateX(-50%);
+      text-align:center;
+      user-select:none;
+      cursor:pointer;
+    }
+
+    /* Make the whole area around dot + labels clickable */
+    .ms a{
+      position:relative;
+      display:block;
+      padding:54px 10px 60px; /* gives a big hit target without moving dot */
+      border-radius:12px;
+      text-decoration:none;
+      color:inherit;
+      outline:none;
+    }
+    .ms a:focus{ box-shadow:0 0 0 3px rgba(17,17,17,.15); }
+
+    /* Dot: CENTER sits on the rail */
+    .ms .bubble{
+      position:absolute;
+      left:50%;
+      top:0;
+      transform:translate(-50%,-50%);
+      width:16px;height:16px;border-radius:50%;
+      border:2px solid var(--ink);
+      background:var(--ink);
+      box-shadow:0 0 0 3px var(--soft);
+    }
+    .ms.degree .bubble{ background:var(--deg); border-color:var(--deg); }
+    .ms.prof   .bubble{ background:var(--pro); border-color:var(--pro); }
+    .ms.mixed  .bubble{
+      border-color:rgba(17,17,17,.65);
+      background:linear-gradient(90deg, var(--deg) 0 50%, var(--pro) 50% 100%);
+    }
+
+    /* Year: always near dot */
+    .ms .when{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:-26px;
+      font-size:12px;
+      opacity:.78;
+      white-space:nowrap;
+    }
+
+    /* Org label: alternates above/below via JS classes */
+    .ms .label{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:12px;
+      opacity:.92;
+      line-height:1.2;
+      white-space:nowrap;
+      max-width:110px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .ms.pos-bottom .label{ top:22px; }   /* below dot */
+    .ms.pos-top    .label{ top:-54px; }  /* above year */
+
+    /* Hover affordance */
+    .ms:hover .label{ text-decoration:underline; text-underline-offset:3px; }
+    .ms:hover .bubble{ transform:translate(-50%,-50%) scale(1.06); }
+    .ms:focus-within .bubble{ transform:translate(-50%,-50%) scale(1.08); }
+
+    /* “Now” treatment */
+    .ms.current .bubble{
+      box-shadow:
+        0 0 0 3px var(--soft),
+        0 0 0 7px rgba(22,163,74,.18);
+    }
+    .ms .nowtag{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:38px;
+      font-size:11px;
+      border:1px solid rgba(17,17,17,.45);
+      border-radius:999px;
+      padding:2px 8px;
+      background:#fff;
+      opacity:.9;
+    }
+
+    /* Edge handling (prevents first/last labels from clipping outside) */
+    .ms.edge-left  .label, .ms.edge-left  .when{ left:0; transform:none; text-align:left; }
+    .ms.edge-right .label, .ms.edge-right .when{ left:auto; right:0; transform:none; text-align:right; }
+
+    /* ===== Details source + modal ===== */
+    details{border:1px solid #ddd;border-radius:14px;background:#fff;margin:12px 0}
+    details > summary{
+      list-style:none;
+      cursor:pointer;
+      padding:14px 14px;
+      display:flex;
+      gap:12px;
+      align-items:baseline;
+      justify-content:space-between;
+      font-weight:650;
+    }
+    details > summary::-webkit-details-marker{display:none}
+    .summary-left{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+    .badge{font-size:12px;border:1px solid #111;border-radius:999px;padding:3px 9px;opacity:.9}
+    .badge.degree{border-color:var(--deg);color:var(--deg)}
+    .badge.prof{border-color:var(--pro);color:var(--pro)}
+    .summary-right{font-size:12px;opacity:.75;white-space:nowrap}
+    .details-body{padding:0 14px 14px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 10px}
+    .chip{font-size:13px;border:1px solid #111;border-radius:999px;padding:4px 10px;opacity:.9}
+    .details-source{display:none}
+
+    dialog#milestoneDialog{
+      border:none;
+      padding:0;
+      max-width:760px;
+      width:calc(100% - 32px);
+      border-radius:16px;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+    }
+    dialog::backdrop{background:rgba(0,0,0,.35)}
+    .modal-head{
+      display:flex;gap:12px;justify-content:space-between;align-items:flex-start;
+      padding:16px 16px 12px;border-bottom:1px solid #eee;background:#fff;border-top-left-radius:16px;border-top-right-radius:16px
+    }
+    .modal-title{margin:0;font-size:18px;line-height:1.25}
+    .modal-sub{font-size:12px;opacity:.8;margin-top:6px}
+    .modal-close{
+      border:1px solid #111;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;
+      line-height:1;font-size:14px;
+    }
+    .modal-close:hover{background:#f3f3f3}
+    .modal-body{padding:14px 16px 16px;background:#fff;border-bottom-left-radius:16px;border-bottom-right-radius:16px}
+    .modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+    .modal-meta{font-size:14px;opacity:.85;margin-top:10px}
+    .modal-body ul{margin:8px 0 0 22px;font-size:16px;line-height:1.5}
+
+    .mini-steps{
+      margin:10px 0 8px;
+      padding:10px 10px;
+      background:#fafafa;
+      border:1px solid #eee;
+      border-radius:12px;
+      font-size:13px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .mini-steps .k{opacity:.75}
+    .mini-steps .v{font-weight:650}
+
+    /* Mobile: keep the timeline readable */
+    @media (max-width: 720px){
+      dialog#milestoneDialog{width:calc(100% - 20px)}
+      .timeline .rail{height:175px; --railY: 90px;}
+      .ms .label{max-width:92px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="nameblock">
+        <h1>Neeraj Hanumante</h1>
+        <div class="tag">Decarbonization • Life Cycle Assessment (LCA) • Energy Systems • Techno-economic screening</div>
+      </div>
+
+      <div class="navbtns">
+        <a href="/scholar">Google Scholar</a>
+        <a href="/linkedin">LinkedIn</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+
+    <p>
+      I work at the intersection of industrial emissions, energy systems, and review-ready technical documentation.
+      Recent work includes facility-level decarbonization screening using GREET, integrating public datasets
+      (e.g., EPA GHGRP/FLIGHT), and translating modeling outputs into decision-ready insights.
+    </p>
+
+    <h2>Career trajectory</h2>
+
+    <div class="card timeline-wrap">
+      <div class="legend">
+        <span class="pill"><span class="dot degree"></span> Degree</span>
+        <span class="pill"><span class="dot prof"></span> Professional</span>
+      
+        <span class="legend-note">
+          appointments / fellowships / employment
+        </span>
+      
+        <span class="legend-hint">
+          Click a milestone for details
+        </span>
+      </div>
+
+      <div class="timeline" role="navigation" aria-label="Career timeline">
+        <div class="rail">
+          <div class="rail-line"></div>
+
+          <!-- Sub-phase hints (non-milestone “step markers”) -->
+          <div class="ranges" id="ranges">
+            <div class="range prof"
+                 data-start="2010" data-end="2015"
+                 data-steps="2013"
+                 data-label="AERB internal step: promotion (C → D)">
+            </div>
+
+            <div class="range mixed"
+                 data-start="2015" data-end="2021"
+                 data-steps="2018,2019"
+                 data-label="PhD phases: Mumbai → Melbourne → Mumbai">
+            </div>
+          </div>
+
+          <!-- Milestones -->
+          <div class="milestones" id="milestones">
+
+            <div class="ms degree" style="left:0%" title="2004–2008 • B.E. (Degree)">
+              <a href="#" data-open="m-be">
+                <div class="when">2004</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>RTM Nagpur</b></div>
+              </a>
+            </div>
+
+            <div class="ms degree" style="left:19.05%" title="2008–2010 • M.Tech. (Degree)">
+              <a href="#" data-open="m-mtech">
+                <div class="when">2008</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>IIT Bombay</b></div>
+              </a>
+            </div>
+
+            <div class="ms prof" style="left:28.57%" title="2010–2015 • AERB (Professional)">
+              <a href="#" data-open="m-aerb">
+                <div class="when">2010</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>AERB</b></div>
+              </a>
+            </div>
+
+            <!-- PhD: half degree / half professional -->
+            <div class="ms mixed" style="left:47.62%" title="2015–2021 • IITB–Monash (Degree + Fellowship)">
+              <a href="#" data-open="m-phd">
+                <div class="when">2015</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>IITB–Monash</b></div>
+              </a>
+            </div>
+
+            <div class="ms prof" style="left:80.95%" title="2021–2022 • IIT Bombay (Professional)">
+              <a href="#" data-open="m-iitbpostdoc">
+                <div class="when">2021</div>
+                <div class="bubble" aria-hidden="true"></div>
+                <div class="label"><b>IIT Bombay</b></div>
+              </a>
+            </div>
+
+          <div class="ms prof row2" style="left:85.71%" title="2022 • Consulting (Professional)">
+            <a href="#" data-open="m-lifelink">
+              <div class="when">2022</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>Life Link</b></div>
+            </a>
+          </div>
+          
+          <div class="ms prof" style="left:90.48%" title="2022–2023 • UT Austin (Professional)">
+            <a href="#" data-open="m-ut">
+              <div class="when">2022</div>
+              <div class="bubble" aria-hidden="true"></div>
+              <div class="label"><b>UT Austin</b></div>
+            </a>
+          </div>
+        <div class="ms prof current" style="left:95.24%" title="2023–Present • Argonne (Professional)">
+          <a href="#" data-open="m-argonne">
+            <div class="when">2023</div>
+            <div class="bubble" aria-hidden="true"></div>
+            <div class="label"><b>Argonne</b></div>
+            <span class="nowtag" aria-hidden="true">Now</span>
+          </a>
+        </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Current focus</h2>
+    <div class="card">
+      <ul>
+        <li><b>Industrial decarbonization screening:</b> facility characterization, emissions drivers, and pathway prioritization (LCA + TEA signals).</li>
+        <li><b>GREET-based life-cycle modeling:</b> transparent assumptions, QA/QC checks, and third-party review-ready documentation.</li>
+        <li><b>Systems modeling:</b> scenario design, sensitivity analysis, and feedback/stock-flow dynamics for sustainability transitions.</li>
+      </ul>
+    </div>
+
+    <h2>Highlights</h2>
+    <div class="card">
+      <ul>
+        <li>Screened <b>300+ industrial facilities</b> across refining, ammonia, steel, cement, and data centers (facility-level decarbonization).</li>
+        <li>Built traceable datasets and documentation (assumption registers, unit normalization, consistency checks) to support reproducibility.</li>
+        <li>Academic outputs across energy–water–economy and circular economy modeling (see Google Scholar).</li>
+      </ul>
+      <!-- <div class="meta">Optional next: add a /resume page or a PDF link.</div> -->
+    </div>
+
+    <p class="meta">© <span id="yr"></span> Neeraj Hanumante</p>
+
+    <!-- ===== Source details (hidden) ===== -->
+    <div class="details-source" id="detailsSource">
+
+      <details id="m-argonne">
+        <summary>
+          <span class="summary-left">
+            <span class="badge prof">Professional</span>
+            Argonne National Laboratory — Postdoctoral Appointee
+          </span>
+          <span class="summary-right">Nov 2023 – Present • United States</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">GREET</span><span class="chip">Industrial screening</span><span class="chip">GHGRP/FLIGHT</span><span class="chip">LCA + TEA</span><span class="chip">QA/QC datasets</span>
+          </div>
+          <ul>
+            <li>Facility-level decarbonization screening across 300+ industrial sites (refining, ammonia, steel, cement, data centers).</li>
+            <li>Life-cycle emissions drivers using GREET with review-ready documentation and transparent assumptions.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> United States (Argonne National Laboratory)</div>
+        </div>
+      </details>
+
+      <details id="m-lifelink">
+        <summary>
+          <span class="summary-left">
+            <span class="badge prof">Professional</span>
+            Life Link Eco Technologies — Sustainability Consultant (Freelance)
+          </span>
+          <span class="summary-right">Mar 2022 – Jun 2022 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">System dynamics</span><span class="chip">ESG framework</span><span class="chip">Templates</span>
+          </div>
+          <ul>
+            <li>Developed a preliminary system dynamics concept model (causal loop structure) for micro-watershed management.</li>
+            <li>Drafted ESG evaluation dimensions, evidence requirements, and reporting templates for Indian mid-cap companies.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+      
+      <details id="m-ut">
+        <summary>
+          <span class="summary-left">
+            <span class="badge prof">Professional</span>
+            The University of Texas at Austin — Postdoctoral Fellow
+          </span>
+          <span class="summary-right">Jul 2022 – Oct 2023 • Austin, TX</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">MFA</span><span class="chip">EEIO</span><span class="chip">Data harmonization</span><span class="chip">Model calibration</span>
+          </div>
+          <ul>
+            <li>Developed U.S. economy flow/stock accounts using material flow analysis (MFA) and environmentally extended input–output (EEIO).</li>
+            <li>Supported calibration and baseline behavior checks for a stock–flow consistent macroeconomic growth model.</li>
+            <li>Engaged with collaborators through technical discussions/feedback to refine assumptions and interpretation.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Austin, Texas, USA</div>
+        </div>
+      </details>
+
+      <details id="m-iitbpostdoc">
+        <summary>
+          <span class="summary-left">
+            <span class="badge prof">Professional</span>
+            Indian Institute of Technology Bombay — Postdoctoral Fellow
+          </span>
+          <span class="summary-right">Mar 2021 – Mar 2022 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">FEW nexus</span><span class="chip">Water stress</span><span class="chip">Scenario design</span><span class="chip">Sensitivity analysis</span>
+          </div>
+          <ul>
+            <li>Developed the water-stress and scarcity-pricing module in a global FEW-nexus framework (6 regions × 3 sectors).</li>
+            <li>Designed and executed a structured scenario suite with parameter consistency checks and sensitivity analysis.</li>
+            <li>Produced peer-reviewed publications from this work (see Google Scholar).</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+
+      <details id="m-phd">
+        <summary>
+          <span class="summary-left">
+            <span class="badge degree">Degree</span>
+            <span class="badge prof">Professional</span>
+            IIT Bombay – Monash University — Doctoral Researcher (Ph.D.)
+          </span>
+          <span class="summary-right">Dec 2015 – Jan 2021 • Mumbai + Monash</span>
+        </summary>
+        <div class="details-body">
+          <div class="mini-steps">
+            <span class="k">Phases:</span>
+            <span class="v">Mumbai (2015–2018)</span> →
+            <span class="v">Melbourne (2018–2019)</span> →
+            <span class="v">Mumbai (2019–2021)</span>
+          </div>
+          <div class="chips">
+            <span class="chip">Circular economy</span><span class="chip">Diffusion (S-curve)</span><span class="chip">Consumer behavior</span><span class="chip">System dynamics</span>
+          </div>
+          <ul>
+            <li>Developed a circular-economy submodel using recycling-rate (waste diversion) dynamics within an integrated global sustainability framework.</li>
+            <li>Quantified how adoption trajectories and consumer behavior shape sustainability outcomes; documented limitations of incentives as a standalone lever.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India + Melbourne, Australia (2018–2019) + Monash University (joint program)</div>
+        </div>
+      </details>
+
+      <details id="m-aerb">
+        <summary>
+          <span class="summary-left">
+            <span class="badge prof">Professional</span>
+            Atomic Energy Regulatory Board (AERB), Govt. of India — Scientific Officer
+          </span>
+          <span class="summary-right">Aug 2010 – Jan 2015 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="mini-steps">
+            <span class="k">Progression:</span>
+            <span class="v">Scientific Officer C (2010–2013)</span> →
+            <span class="v">Scientific Officer D (2013–2015)</span>
+          </div>
+          <div class="chips">
+            <span class="chip">Technical review</span><span class="chip">Regulatory inspections</span><span class="chip">Meeting coordination</span><span class="chip">Traceable documentation</span>
+          </div>
+          <ul>
+            <li>Supported the regulatory review and inspection lifecycle for major power projects with evidence-traceable documentation.</li>
+            <li>Coordinated technical meetings for assigned areas (agenda/materials, minutes, follow-ups) to support timely closure of actions.</li>
+            <li>Participated in inspections across two sites; supported preparation and post-inspection corrective action communication.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+
+      <details id="m-mtech">
+        <summary>
+          <span class="summary-left">
+            <span class="badge degree">Degree</span>
+            Indian Institute of Technology Bombay — M.Tech., Energy Systems Engineering
+          </span>
+          <span class="summary-right">2008 – 2010 • Mumbai, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">Energy systems</span><span class="chip">Modeling</span><span class="chip">Analysis</span>
+          </div>
+          <ul>
+            <li>Graduate training in energy systems analysis and engineering decision-making.</li>
+            <li>Strengthened quantitative foundations for later sustainability and decarbonization work.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Mumbai, India</div>
+        </div>
+      </details>
+
+      <details id="m-be">
+        <summary>
+          <span class="summary-left">
+            <span class="badge degree">Degree</span>
+            RTM Nagpur University — B.E., Mechanical Engineering
+          </span>
+          <span class="summary-right">2004 – 2008 • Nagpur, India</span>
+        </summary>
+        <div class="details-body">
+          <div class="chips">
+            <span class="chip">Mechanical engineering</span><span class="chip">Thermo/fluids</span><span class="chip">Engineering analysis</span>
+          </div>
+          <ul>
+            <li>Undergraduate training in mechanical engineering fundamentals and quantitative problem solving.</li>
+          </ul>
+          <div class="meta"><b>Location:</b> Nagpur, India</div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <dialog id="milestoneDialog" aria-label="Milestone details">
+    <div class="modal-head">
+      <div>
+        <div class="modal-badges" id="mdBadges"></div>
+        <div class="modal-title" id="mdTitle"></div>
+        <div class="modal-sub" id="mdSub"></div>
+      </div>
+      <button class="modal-close" id="mdClose" type="button" aria-label="Close">Close</button>
+    </div>
+    <div class="modal-body" id="mdBody"></div>
+  </dialog>
+
+  <script>
+    // ===== Modal helpers =====
+    const dialog = document.getElementById("milestoneDialog");
+    const mdTitle = document.getElementById("mdTitle");
+    const mdSub = document.getElementById("mdSub");
+    const mdBody = document.getElementById("mdBody");
+    const mdBadges = document.getElementById("mdBadges");
+    const mdClose = document.getElementById("mdClose");
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function extractAndShow(id){
+      const src = document.getElementById(id);
+      if(!src || src.tagName.toLowerCase() !== "details") return;
+
+      const summary = src.querySelector("summary");
+      const left = summary ? summary.querySelector(".summary-left") : null;
+      const right = summary ? summary.querySelector(".summary-right") : null;
+
+      // Collect ALL badges (Degree / Professional)
+      const badgeEls = left ? Array.from(left.querySelectorAll(".badge")) : [];
+      const badgesHtml = badgeEls.map(b => {
+        const cls = b.classList.contains("degree") ? "degree" : (b.classList.contains("prof") ? "prof" : "");
+        return `<span class="badge ${cls}">${escapeHtml(b.textContent.trim())}</span>`;
+      }).join("");
+
+      // Title text without badge text
+      let titleText = left ? left.textContent.trim() : "";
+      badgeEls.forEach(b => { titleText = titleText.replace(b.textContent.trim(), "").trim(); });
+
+      mdTitle.textContent = titleText || "Details";
+      mdSub.textContent = right ? right.textContent.trim() : "";
+      mdBadges.innerHTML = badgesHtml;
+
+      const chipEls = src.querySelectorAll(".chips .chip");
+      const chipsHtml = chipEls.length
+        ? `<div class="chips">${Array.from(chipEls).map(c => `<span class="chip">${escapeHtml(c.textContent.trim())}</span>`).join("")}</div>`
+        : "";
+
+      const mini = src.querySelector(".mini-steps");
+      const miniHtml = mini ? `<div class="mini-steps">${mini.innerHTML}</div>` : "";
+
+      const liEls = src.querySelectorAll(".details-body ul li");
+      const bulletsHtml = liEls.length
+        ? `<ul>${Array.from(liEls).map(li => `<li>${escapeHtml(li.textContent.trim())}</li>`).join("")}</ul>`
+        : "";
+
+      const metaEl = src.querySelector(".details-body .meta");
+      const metaHtml = metaEl ? `<div class="modal-meta">${metaEl.innerHTML}</div>` : "";
+
+      mdBody.innerHTML = `${miniHtml}${chipsHtml}${bulletsHtml}${metaHtml}`;
+
+      if(typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open","open");
+
+      try { history.replaceState(null, "", "#" + id); } catch(e) {}
+    }
+
+    mdClose.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (e) => {
+      const rect = dialog.getBoundingClientRect();
+      const inDialog = (
+        e.clientX >= rect.left && e.clientX <= rect.right &&
+        e.clientY >= rect.top && e.clientY <= rect.bottom
+      );
+      if(!inDialog) dialog.close();
+    });
+
+    document.querySelectorAll('[data-open]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        extractAndShow(a.getAttribute('data-open'));
+      });
+    });
+
+    // ===== Timeline helpers: ranges + soft alternation (collision-aware) =====
+    (function(){
+      const rangesWrap = document.getElementById("ranges");
+      const milestonesWrap = document.getElementById("milestones");
+      if(!rangesWrap || !milestonesWrap) return;
+
+      const START_YEAR = 2004;
+      const END_YEAR = new Date().getFullYear();
+
+      function pctFromYear(y){
+        return ((y - START_YEAR) / (END_YEAR - START_YEAR)) * 100;
+      }
+
+      // Draw range bars + step ticks (non-milestone markers)
+      function renderRanges(){
+        const rangeEls = Array.from(rangesWrap.querySelectorAll(".range[data-start][data-end]"));
+        rangeEls.forEach(r => {
+          r.innerHTML = "";
+
+          const start = parseFloat(r.dataset.start);
+          const end   = parseFloat(r.dataset.end);
+          const steps = (r.dataset.steps || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(Number);
+
+          const leftPct = pctFromYear(start);
+          const rightPct = pctFromYear(end);
+          const widthPct = Math.max(0, rightPct - leftPct);
+
+          r.style.left = leftPct + "%";
+          r.style.width = widthPct + "%";
+
+          // bar
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          r.appendChild(bar);
+
+          // ticks
+          steps.forEach(y => {
+            if(y < start || y > end) return;
+            const tick = document.createElement("div");
+            tick.className = "tick";
+            tick.style.left = ((y - start) / (end - start)) * 100 + "%";
+            r.appendChild(tick);
+          });
+        });
+      }
+
+      function rectsOverlap(a, b){
+        return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+      }
+
+      function applySoftAlternation(){
+        const ms = Array.from(milestonesWrap.querySelectorAll(".ms"));
+
+        ms.sort((a,b)=>{
+          const la = parseFloat((a.style.left || "0").replace("%",""));
+          const lb = parseFloat((b.style.left || "0").replace("%",""));
+          return la - lb;
+        });
+
+        ms.forEach(el => el.classList.remove("pos-top","pos-bottom","edge-left","edge-right"));
+
+        ms.forEach(el => {
+          const left = parseFloat((el.style.left || "0").replace("%",""));
+          if(left <= 3) el.classList.add("edge-left");
+          if(left >= 97) el.classList.add("edge-right");
+        });
+
+        // Strict alternation base
+        ms.forEach((el, i) => el.classList.add(i % 2 === 0 ? "pos-bottom" : "pos-top"));
+
+        // Bias "Now" to bottom
+        const current = ms.find(el => el.classList.contains("current"));
+        if(current){
+          current.classList.remove("pos-top");
+          current.classList.add("pos-bottom");
+        }
+
+        // Collision-aware flip (run multiple passes)
+        function resolve(sideClass){
+          const group = ms.filter(el => el.classList.contains(sideClass));
+          let lastRect = null;
+
+          group.forEach(el => {
+            const label = el.querySelector(".label");
+            if(!label) return;
+            const r = label.getBoundingClientRect();
+
+            if(lastRect && rectsOverlap(r, lastRect)){
+              el.classList.toggle("pos-top");
+              el.classList.toggle("pos-bottom");
+            } else {
+              lastRect = r;
+            }
+          });
+        }
+
+        resolve("pos-top");
+        resolve("pos-bottom");
+        resolve("pos-top");
+      }
+
+      function rerun(){
+        renderRanges();
+        requestAnimationFrame(applySoftAlternation);
+      }
+
+      window.addEventListener("load", rerun);
+      window.addEventListener("resize", rerun);
+      rerun();
+    })();
+
+    // Init: hash open + footer year
+    window.addEventListener('load', () => {
+      const id = (location.hash || "").replace("#","");
+      if(id) extractAndShow(id);
+      document.getElementById("yr").textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>
