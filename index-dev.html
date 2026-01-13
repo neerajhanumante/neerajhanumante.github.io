@@ -324,6 +324,49 @@
       .timeline .rail{height:175px; --railY: 90px;}
       .ms .label{max-width:92px}
     }
+
+    /* ===== Projects (accordion library) ===== */
+  .proj-card{border:1px solid #ddd;border-radius:14px;padding:16px;margin:14px 0;background:#fff}
+  .proj-intro{font-size:16px;opacity:.9;margin:6px 0 0}
+  .proj-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+
+  .proj details{border:1px solid #ddd;border-radius:14px;background:#fff;margin:0}
+  .proj details > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:14px 14px;
+    display:flex;
+    gap:12px;
+    align-items:baseline;
+    justify-content:space-between;
+    font-weight:650;
+  }
+  .proj details > summary::-webkit-details-marker{display:none}
+  .proj .group-meta{font-size:12px;opacity:.75;white-space:nowrap}
+
+  .proj .group-body{padding:0 14px 14px}
+  .proj .proj-item{border-top:1px solid #eee;padding-top:12px;margin-top:12px}
+  .proj .proj-item:first-child{border-top:none;padding-top:0;margin-top:0}
+  .proj .proj-title{margin:0;font-size:16px}
+  .proj .proj-title a{text-decoration:none;color:inherit}
+  .proj .proj-title a:hover{text-decoration:underline;text-underline-offset:3px}
+  .proj .proj-sub{font-size:13px;opacity:.8;margin:6px 0 8px}
+  .proj .proj-item ul{margin:6px 0 0 22px;font-size:16px;line-height:1.5}
+
+  /* Make project links in modal/details look intentional */
+  .proj-link{
+    display:inline-block;
+    border:1px solid rgba(17,17,17,.35);
+    border-radius:999px;
+    padding:2px 8px;
+    font-size:12px;
+    text-decoration:none;
+    color:inherit;
+    opacity:.9;
+    margin-left:6px;
+  }
+  .proj-link:hover{background:#f3f3f3}
+    
   </style>
 </head>
 
@@ -498,6 +541,12 @@
             <li>Life-cycle emissions drivers using GREET with review-ready documentation and transparent assumptions.</li>
           </ul>
           <div class="meta"><b>Location:</b> United States (Argonne National Laboratory)</div>
+          <div class="meta">
+            <b>Projects:</b>
+            <a class="proj-link" href="#p-industrial-screening">Facility screening</a>
+            <a class="proj-link" href="#p-ghgrp-harmonization">GHGRP/FLIGHT harmonization</a>
+          </div>
+
         </div>
       </details>
 
@@ -752,7 +801,46 @@
         extractAndShow(a.getAttribute('data-open'));
       });
     });
-
+    // ===== Project deep-links: close modal, open accordion, scroll nicely =====
+      function openProjectFromHash(hash){
+        if(!hash || !hash.startsWith("#p-")) return false;
+    
+        const target = document.querySelector(hash);
+        if(!target) return false;
+    
+        // Open the closest project group <details>
+        const groupDetails = target.closest('.proj details');
+        if(groupDetails) groupDetails.open = true;
+    
+        // Smooth scroll to the project
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+    
+        return true;
+      }
+    
+      // Intercept clicks on project links (works inside modal too)
+      document.addEventListener("click", (e) => {
+        const a = e.target.closest('a[href^="#p-"]');
+        if(!a) return;
+    
+        // Close modal if open
+        const dlg = document.getElementById("milestoneDialog");
+        if(dlg && dlg.open) dlg.close();
+    
+        // Let the hash update, then open accordion
+        const hash = a.getAttribute("href");
+        setTimeout(() => openProjectFromHash(hash), 0);
+      });
+    
+      // If user lands directly on a project hash, open the accordion on load
+      window.addEventListener("load", () => {
+        openProjectFromHash(location.hash);
+      });
+    
+      // If hash changes (back/forward), open accordingly
+      window.addEventListener("hashchange", () => {
+        openProjectFromHash(location.hash);
+      });
     // ===== Timeline helpers: ranges + soft alternation (collision-aware) =====
     (function(){
       const rangesWrap = document.getElementById("ranges");
@@ -867,6 +955,107 @@
       window.addEventListener("resize", rerun);
       rerun();
     })();
+
+    <h2 id="projects">Selected projects</h2>
+
+<div class="proj-card proj">
+  <p class="proj-intro">
+    Explore project summaries by theme. Links inside the career timeline open the relevant project automatically.
+  </p>
+
+  <div class="proj-grid">
+
+    <!-- Group 1 -->
+    <details data-proj-group="industrial">
+      <summary>
+        <span>Industrial decarbonization & facility screening</span>
+        <span class="group-meta">Tooling • datasets • LCA signals</span>
+      </summary>
+      <div class="group-body">
+
+        <div class="proj-item" id="p-industrial-screening">
+          <h3 class="proj-title">
+            <a href="#p-industrial-screening">Facility-level decarbonization screening (300+ sites)</a>
+          </h3>
+          <div class="proj-sub">GREET • GHGRP/FLIGHT • pathway prioritization • QA/QC</div>
+          <ul>
+            <li>Integrated public datasets into a consistent facility characterization workflow.</li>
+            <li>Generated decision-ready pathway shortlists using LCA + TEA signals.</li>
+            <li>Produced review-ready documentation (assumptions, unit normalization, consistency checks).</li>
+          </ul>
+        </div>
+
+        <div class="proj-item" id="p-ghgrp-harmonization">
+          <h3 class="proj-title">
+            <a href="#p-ghgrp-harmonization">Public data harmonization (EPA GHGRP/FLIGHT)</a>
+          </h3>
+          <div class="proj-sub">Data QA • reproducibility • traceability</div>
+          <ul>
+            <li>Built traceable pipelines for unit harmonization and facility mapping.</li>
+            <li>Created assumption registers and reproducibility artifacts.</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+
+    <!-- Group 2 -->
+    <details data-proj-group="models">
+      <summary>
+        <span>Systems modeling & macro / MFA work</span>
+        <span class="group-meta">MFA • EEIO • stock–flow</span>
+      </summary>
+      <div class="group-body">
+
+        <div class="proj-item" id="p-mfa-eeio">
+          <h3 class="proj-title">
+            <a href="#p-mfa-eeio">U.S. economy flow/stock accounts (MFA + EEIO)</a>
+          </h3>
+          <div class="proj-sub">Data harmonization • calibration • baseline checks</div>
+          <ul>
+            <li>Developed flow/stock accounts and supported macro model calibration.</li>
+            <li>Performed baseline behavior checks and interpretation support.</li>
+          </ul>
+        </div>
+
+        <div class="proj-item" id="p-watershed-sd">
+          <h3 class="proj-title">
+            <a href="#p-watershed-sd">Micro-watershed system dynamics concept model</a>
+          </h3>
+          <div class="proj-sub">Causal loop structure • stakeholder framing</div>
+          <ul>
+            <li>Built an initial CLD and identified leverage points and data needs.</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+
+    <!-- Group 3 -->
+    <details data-proj-group="few">
+      <summary>
+        <span>FEW nexus & water stress module</span>
+        <span class="group-meta">Scenario design • sensitivity</span>
+      </summary>
+      <div class="group-body">
+
+        <div class="proj-item" id="p-water-stress">
+          <h3 class="proj-title">
+            <a href="#p-water-stress">Water-stress & scarcity-pricing module (global FEW framework)</a>
+          </h3>
+          <div class="proj-sub">6 regions × 3 sectors • structured scenarios</div>
+          <ul>
+            <li>Designed scenarios with parameter consistency checks and sensitivity analysis.</li>
+            <li>Supported peer-reviewed outputs (see Scholar).</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+
+  </div>
+</div>
+
 
     // Init: hash open + footer year
     window.addEventListener('load', () => {
